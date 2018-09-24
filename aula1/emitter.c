@@ -73,6 +73,8 @@ int main(int argc, char **argv) {
         exit(-2);
     }
 
+    buf[n_bytes-1] = '\0';
+
     n_bytes = write(serial_port_fd, buf, n_bytes * sizeof(buf[0]));
     if (n_bytes == -1) {
         fprintf(stderr, "Failed to write in serial port");
