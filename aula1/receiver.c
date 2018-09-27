@@ -56,6 +56,8 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
+    printf("Waiting message ...\n");
+
     char byte, message[4096];
     size_t num_bytes_read = 0;
     ssize_t res;
@@ -74,8 +76,10 @@ int main(int argc, char** argv)
       }
     }
 
-    printf("%zd bytes read from the serial port\n", num_bytes_read);
+    printf("\n%zd bytes read from the serial port\n", num_bytes_read);
     printf("Message: %s\n", message);
+
+    printf("\nSending message ...\n");
 
     res = write(serial_port_fd, message, strlen(message)+1);
     if (res == -1) {
@@ -85,6 +89,8 @@ int main(int argc, char** argv)
       fprintf(stderr, "Error: could not send the whole message!!!\n");
       exit(-4);
     }
+
+    printf("Message sent.\n");
   
     sleep(2);
     tcsetattr(serial_port_fd, TCSANOW, &old_termio);
