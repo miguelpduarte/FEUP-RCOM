@@ -61,11 +61,11 @@ int main(int argc, char **argv) {
         exit(-1);
     }
 
-    printf("New term_ios structure set\n");
-
     char *buf = NULL;
     size_t n;
     ssize_t n_bytes;
+
+    printf("Enter a message: ");
 
     n_bytes = getline(&buf, &n, stdin);
     if (n_bytes == -1) {
@@ -103,7 +103,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    printf("Message: %s\n", message);
+    printf("\nWaiting message...\n");
+    printf("Message returned: %s\n", message);
     
     sleep(2);
 
