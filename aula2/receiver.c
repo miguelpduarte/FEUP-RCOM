@@ -10,7 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "message.h"
+#include "message_defines.h"
 
 #define BAUDRATE B38400
 #define SERIAL_PORT "/dev/ttyS0"
@@ -23,13 +23,13 @@ int main(int argc, char** argv) {
     because we don't want to get killed if linenoise sends CTRL-C.
   */
     
-    int serial_port_fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY );
+    int serial_port_fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY);
     if (serial_port_fd < 0) {
         perror(SERIAL_PORT); 
         exit(-1); 
     }
 
-    if ( tcgetattr(serial_port_fd, &old_termio) == -1) { /* save current port settings */
+    if (tcgetattr(serial_port_fd, &old_termio) == -1) { /* save current port settings */
       perror("tcgetattr");
       exit(-1);
     }
@@ -42,8 +42,8 @@ int main(int argc, char** argv) {
     /* set input mode (non-canonical, no echo,...) */
     new_termio.c_lflag = 0;
 
-    new_termio.c_cc[VTIME]    = 30;   /* inter-character timer set for 3 seconds */
-    new_termio.c_cc[VMIN]     = 1;   /* blocking read until 5 chars received */
+    new_termio.c_cc[VTIME]    = MSG_WAIT_TIME;
+    new_termio.c_cc[VMIN]     = MSG_MIN_CHARS;
 
   /* 
     VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 
     tcflush(serial_port_fd, TCIOFLUSH);
 
-    if ( tcsetattr(serial_port_fd, TCSANOW, &new_termio) == -1) {
+    if (tcsetattr(serial_port_fd, TCSANOW, &new_termio) == -1) {
       perror("tcsetattr");
       exit(-1);
     }

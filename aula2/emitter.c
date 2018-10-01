@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <strings.h>
+
+#include "message_defines.h"
 #include "message.h"
 
 #define BAUDRATE B38400
@@ -47,13 +49,8 @@ int main(int argc, char **argv) {
     // set input mode (non-canonical, no echo,...)
     new_termio.c_lflag = 0;
 
-    new_termio.c_cc[VTIME] = 0; // inter-character timer unused
-    new_termio.c_cc[VMIN] = 5;  // blocking read until 5 chars received
-
-    /* 
-    VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
-    leitura do(s) próximo(s) caracter(es)
-  */
+    new_termio.c_cc[VTIME] = MSG_WAIT_TIME;
+    new_termio.c_cc[VMIN] = MSG_MIN_CHARS;
 
     tcflush(serial_port_fd, TCIOFLUSH);
 
@@ -62,19 +59,12 @@ int main(int argc, char **argv) {
         exit(-1);
     }
 
-    char *buf = NULL;
-    size_t n;
     ssize_t n_bytes;
 
-    unsigned char msg[5];
-    msg[0] = MSG_FLAG;
-    msg[1] = MSG_ADDR_EMT;
-    msg[2] = MSG_CTRL_SET;
-    msg[3] = MSG_BCC1(msg[1],msg[2]);
-    msg[4] = MSG_FLAG;
+    byte msg_buf[MSG_SUPERVISION_MSG_SIZE];
+    buildSupervisionMessage(MSG_ADDR_EMT, MSG_CTRL_SET, msg_buf);
 
-
-    n_bytes = write(serial_port_fd, msg, 5 * sizeof(msg[0]));
+    n_bytes = write(serial_port_fd, msg_buf, MSG_SUPERVISION_MSG_SIZE);
     if (n_bytes == -1) {
         fprintf(stderr, "Failed to write in serial port");
         exit(-3);
@@ -83,31 +73,29 @@ int main(int argc, char **argv) {
     printf("%zd bytes written to serial port\n", n_bytes);
     //Waiting to ensure that the data is sent before resetting SP configurations
     
-    char message[4096];
-    char byte;
-    n = 0;
+    // char message[4096];
+    // char byte;
+    // n = 0;
 
-    while(1){
-        n_bytes = read(serial_port_fd, &byte, 1);
+    // while(1){
+    //     n_bytes = read(serial_port_fd, &byte, 1);
 
-        if(n_bytes == -1){
-            fprintf(stderr, "Error reading return message");
-            exit(-4);
-        }
+    //     if(n_bytes == -1){
+    //         fprintf(stderr, "Error reading return message");
+    //         exit(-4);
+    //     }
 
-        message[n++] = byte;
+    //     message[n++] = byte;
 
-        if(byte == '\0'){
-            break;
-        }
-    }
+    //     if(byte == '\0'){
+    //         break;
+    //     }
+    // }
 
-    printf("\nWaiting message...\n");
-    printf("Message returned: %s\n", message);
+    // printf("\nWaiting message...\n");
+    // printf("Message returned: %s\n", message);
     
     sleep(2);
-
-    free(buf);
 
     if (tcsetattr(serial_port_fd, TCSANOW, &old_termio) == -1) {
         perror("tcsetattr reset");
