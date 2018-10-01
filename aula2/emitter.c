@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <strings.h>
+#include "message.h"
 
 #define BAUDRATE B38400
 #define SERIAL_PORT "/dev/ttyS0"
@@ -65,17 +66,15 @@ int main(int argc, char **argv) {
     size_t n;
     ssize_t n_bytes;
 
-    printf("Enter a message: ");
+    unsigned char msg[5];
+    msg[0] = MSG_FLAG;
+    msg[1] = MSG_ADDR_EMT;
+    msg[2] = MSG_CTRL_SET;
+    msg[3] = MSG_BCC1(msg[1],msg[2]);
+    msg[4] = MSG_FLAG;
 
-    n_bytes = getline(&buf, &n, stdin);
-    if (n_bytes == -1) {
-        fprintf(stderr, "Error in reading from stdin");
-        exit(-2);
-    }
 
-    buf[n_bytes-1] = '\0';
-
-    n_bytes = write(serial_port_fd, buf, n_bytes * sizeof(buf[0]));
+    n_bytes = write(serial_port_fd, msg, 5 * sizeof(msg[0]));
     if (n_bytes == -1) {
         fprintf(stderr, "Failed to write in serial port");
         exit(-3);
