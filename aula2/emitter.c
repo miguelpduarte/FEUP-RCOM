@@ -73,28 +73,6 @@ int main(int argc, char **argv) {
     printf("%zd bytes written to serial port\n", n_bytes);
     //Waiting to ensure that the data is sent before resetting SP configurations
     
-    // char message[4096];
-    // char byte;
-    // n = 0;
-
-    // while(1){
-    //     n_bytes = read(serial_port_fd, &byte, 1);
-
-    //     if(n_bytes == -1){
-    //         fprintf(stderr, "Error reading return message");
-    //         exit(-4);
-    //     }
-
-    //     message[n++] = byte;
-
-    //     if(byte == '\0'){
-    //         break;
-    //     }
-    // }
-
-    // printf("\nWaiting message...\n");
-    // printf("Message returned: %s\n", message);
-    
     sleep(2);
 
     if (tcsetattr(serial_port_fd, TCSANOW, &old_termio) == -1) {
