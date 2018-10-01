@@ -20,4 +20,8 @@
 //bcc
 #define MSG_BCC1(addr, ctrl)    ((addr) ^ (ctrl))
 
+//other
+#define MSG_WAIT_TIME   30 /* Will wait 3 seconds */
+#define MSG_MIN_CHARS   1  /* Will wait until received 1 char */
+
 #endif /* _MESSAGE_ */

@@ -10,12 +10,13 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "message.h"
+
 #define BAUDRATE B38400
 #define SERIAL_PORT "/dev/ttyS0"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     struct termios old_termio, new_termio;
   /*
     Open serial port device for reading and writing and not as controlling tty
@@ -41,8 +42,8 @@ int main(int argc, char** argv)
     /* set input mode (non-canonical, no echo,...) */
     new_termio.c_lflag = 0;
 
-    new_termio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
-    new_termio.c_cc[VMIN]     = 5;   /* blocking read until 5 chars received */
+    new_termio.c_cc[VTIME]    = 30;   /* inter-character timer set for 3 seconds */
+    new_termio.c_cc[VMIN]     = 1;   /* blocking read until 5 chars received */
 
   /* 
     VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
@@ -56,7 +57,7 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
-    printf("Waiting message ...\n");
+    printf("Waiting for message...\n");
 
     char byte, message[4096];
     size_t num_bytes_read = 0;
