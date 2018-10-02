@@ -83,7 +83,7 @@ static void handleAddrReceived(byte msg_byte) {
 static void handleCtrlReceived(byte msg_byte) {
     switch (msg_byte) {
         case MSG_FLAG:
-            setState(WAITING_FLAG);
+            setState(FLAG_RCV);
             break;
         default:
             if(msg_byte == MSG_BCC1(state_machine.addr, state_machine.ctrl)) {
