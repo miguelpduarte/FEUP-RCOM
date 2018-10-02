@@ -13,6 +13,6 @@ typedef struct {
 
 state_st getState();
 
-void handleEvent(byte msg_byte);
+void handleMsgByte(byte msg_byte);
 
 #endif /* _STATE_ */

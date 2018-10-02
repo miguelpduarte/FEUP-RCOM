@@ -1,5 +1,12 @@
 #include "state.h"
 
+static void handleWaitingFlag(byte msg_byte);
+static void handleFlagReceived(byte msg_byte);
+static void handleAddrReceived(byte msg_byte);
+static void handleCtrlReceived(byte msg_byte);
+static void handleBccOk(byte msg_byte);
+static void setState(state_st new_state);
+
 static state_machine_st state_machine = (state_machine_st){.current_state = WAITING_FLAG};
 
 state_st getState() {
@@ -8,7 +15,7 @@ state_st getState() {
 
 // WAITING_FLAG, FLAG_RCV, ADDR_RCV, CTRL_RCV, BCC_OK, MSG_RECEIVED
 
-void handleEvent(byte msg_byte) {
+void handleMsgByte(byte msg_byte) {
     switch (state_machine.current_state) {
         case WAITING_FLAG:
             handleWaitingFlag(msg_byte);
