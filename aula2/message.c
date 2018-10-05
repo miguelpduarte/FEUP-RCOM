@@ -28,7 +28,7 @@ int readSupervisionMessage(int fd, byte* buffer) {
     while(getState() != MSG_RECEIVED) {
         ret = readMessageByte(fd, &msg_byte);
 
-        if (ret < 0) {
+        if (ret <= 0) {
             return ret;
         }
 

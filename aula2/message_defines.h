@@ -27,9 +27,11 @@
 
 //message configurations
 #define MSG_WAIT_TIME               30       /* Will wait 3 seconds */
-#define MSG_MIN_CHARS               1        /* Will wait until received 1 char */
-#define MSG_SUPERVISION_MSG_SIZE    5        /* Size of the supervision message */   
+#define MSG_MIN_CHARS               0        /* If MIN = 0 and TIME > 0, TIME serves as a timeout value. The read will be satisfied 
+                                                    if a single character is read, or TIME is exceeded (t = TIME *0.1 s). If TIME is 
+                                                    exceeded, no character will be returned */
 #define MSG_NUM_READ_TRIES          3        /* Number of times reading the response is tried. After these number of tries, abort */
+#define MSG_SUPERVISION_MSG_SIZE    5        /* Size of the supervision message */   
 
 //other
 typedef unsigned char byte;
