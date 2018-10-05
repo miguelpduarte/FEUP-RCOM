@@ -1,4 +1,4 @@
-/*Non-Canonical Input Processing*/
+/* //Non-Canonical Input Processing
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -14,14 +14,10 @@
 
 #define BAUDRATE B38400
 #define SERIAL_PORT "/dev/ttyS0"
-#define _POSIX_SOURCE 1 /* POSIX compliant source */
+#define _POSIX_SOURCE 1 // POSIX compliant source
 
 int main(int argc, char** argv) {
     struct termios old_termio, new_termio;
-  /*
-    Open serial port device for reading and writing and not as controlling tty
-    because we don't want to get killed if linenoise sends CTRL-C.
-  */
     
     int serial_port_fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY);
     if (serial_port_fd < 0) {
@@ -29,7 +25,7 @@ int main(int argc, char** argv) {
         exit(-1); 
     }
 
-    if (tcgetattr(serial_port_fd, &old_termio) == -1) { /* save current port settings */
+    if (tcgetattr(serial_port_fd, &old_termio) == -1) { // save current port settings
       perror("tcgetattr");
       exit(-1);
     }
@@ -39,16 +35,14 @@ int main(int argc, char** argv) {
     new_termio.c_iflag = IGNPAR;
     new_termio.c_oflag = 0;
 
-    /* set input mode (non-canonical, no echo,...) */
+    // set input mode (non-canonical, no echo,...)
     new_termio.c_lflag = 0;
 
     new_termio.c_cc[VTIME]    = MSG_WAIT_TIME;
     new_termio.c_cc[VMIN]     = MSG_MIN_CHARS;
 
-  /* 
-    VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
-    leitura do(s) próximo(s) caracter(es)
-  */
+    // VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
+    // leitura do(s) próximo(s) caracter(es)
 
     tcflush(serial_port_fd, TCIOFLUSH);
 
@@ -99,3 +93,4 @@ int main(int argc, char** argv) {
 
     return 0;
 }
+ */
