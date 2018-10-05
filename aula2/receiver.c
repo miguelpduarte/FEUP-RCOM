@@ -1,4 +1,4 @@
-/* //Non-Canonical Input Processing
+ //Non-Canonical Input Processing
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,7 +10,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "message_defines.h"
+#include "ll.h"
+
 
 #define BAUDRATE B38400
 #define SERIAL_PORT "/dev/ttyS0"
@@ -53,39 +54,14 @@ int main(int argc, char** argv) {
 
     printf("Waiting for message...\n");
 
-    char byte, message[4096];
-    size_t num_bytes_read = 0;
-    ssize_t res;
-    while (1) {
-      res = read(serial_port_fd, &byte, 1);
+    int ret = llopen(serial_port_fd, RECEIVER);
 
-      if (res == -1) {
-        fprintf(stderr, "Error in reading from " SERIAL_PORT "\n");
+    if (ret < 0) {
+        fprintf(stderr, "llopen() function failed\n");
         exit(-2);
-      }
-
-      message[num_bytes_read++] = byte;
-
-      if (byte == '\0') {
-        break;
-      }
     }
 
-    printf("\n%zd bytes read from the serial port\n", num_bytes_read);
-    printf("Message: %s\n", message);
-
-    printf("\nSending message ...\n");
-
-    res = write(serial_port_fd, message, strlen(message)+1);
-    if (res == -1) {
-      fprintf(stderr, "Error in writing to " SERIAL_PORT "\n");
-      exit(-3);
-    } else if (res != strlen(message) + 1) {
-      fprintf(stderr, "Error: could not send the whole message!!!\n");
-      exit(-4);
-    }
-
-    printf("Message sent.\n");
+    printf("llopen() successful: %d\n", ret);
   
     sleep(2);
     tcsetattr(serial_port_fd, TCSANOW, &old_termio);
@@ -93,4 +69,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
- */
