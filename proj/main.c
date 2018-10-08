@@ -59,7 +59,9 @@ int main(int argc, char **argv) {
         exit(-2);
     }
 
-    int ret = llopen(serial_port_fd, argv[1] == EMITTER ? EMITTER : RECEIVER);
+    int isEmitter = atoi(argv[1]);
+
+    int ret = llopen(serial_port_fd, isEmitter == EMITTER);
 
     if (ret < 0) {
         fprintf(stderr, "llopen() function failed\n");
