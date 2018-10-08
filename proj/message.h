@@ -23,12 +23,4 @@ int writeInfoMessage(int fd, byte msg_addr, byte msg_ctrl, byte * data, size_t d
  */
 int readSupervisionMessage(int fd, byte* buffer);
 
-/**
- *  @brief reads a byte from the data connection, placing it in the msg_byte parameter
- *  @param  fd          data connection file descriptor
- *  @param  msg_byte    message byte
- *  @return positive number on success, negative number on failure
- */
-int readMessageByte(int fd, byte* msg_byte);
-
 #endif /* _MESSAGE_ */

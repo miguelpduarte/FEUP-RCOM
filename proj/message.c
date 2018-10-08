@@ -55,9 +55,9 @@ static byte calcBcc2(byte * data, const size_t data_size) {
 
 int readSupervisionMessage(int fd, byte* buffer) {
     byte msg_byte;
-    int ret;
+    ssize_t ret;
     while(getState() != MSG_RECEIVED) {
-        ret = readMessageByte(fd, &msg_byte);
+        ret = read(fd, &msg_byte, 1);
 
         if (ret <= 0) {
             return ret;
@@ -71,18 +71,3 @@ int readSupervisionMessage(int fd, byte* buffer) {
 
     return MSG_SUPERVISION_MSG_SIZE;
 }
-
-int readMessageByte(int fd, byte* msg_byte) {
-    int num_tries;
-    ssize_t num_read_bytes;
-    for(num_tries = 0; num_tries < MSG_NUM_READ_TRIES; num_tries++) {
-        num_read_bytes = read(fd, msg_byte, 1);
-
-        if (num_read_bytes > 0) {
-            break;
-        }
-    }
-
-    return num_read_bytes;
-}
-

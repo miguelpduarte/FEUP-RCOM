@@ -9,9 +9,8 @@
 
 // Errors
 #define WRITE_SUPERVISION_MSG_FAILED        -1
-#define READ_SUPERVISION_MSG_FAILED         -2
-#define INVALID_RECEIVER_ACKNOWLEDGEMENT    -3
-#define INVALID_COMMUNICATION_ROLE          -4
+#define INVALID_COMMUNICATION_ROLE          -2
+#define ESTABLISH_DATA_CONNECTION_FAILED    -3
 
 /**
  * @brief   opens data connection connection

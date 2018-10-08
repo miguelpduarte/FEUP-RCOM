@@ -7,22 +7,29 @@ int llopen(int fd, byte role) {
     byte buf[MSG_SUPERVISION_MSG_SIZE];
 
     if (role == EMITTER) {
-        // Attempt to establish data connection
-        int ret = writeSupervisionMessage(fd, MSG_ADDR_EMT, MSG_CTRL_SET);
-        if (ret != MSG_SUPERVISION_MSG_SIZE) {
-            return WRITE_SUPERVISION_MSG_FAILED;
+        int num_tries, ret;
+        for (num_tries = 0; num_tries < MSG_NUM_READ_TRIES; num_tries++) {
+            ret = writeSupervisionMessage(fd, MSG_ADDR_EMT, MSG_CTRL_SET);
+
+            // If the whole message could not be written, retry to write it
+            if (ret != MSG_SUPERVISION_MSG_SIZE) {
+                continue;
+            }
+
+            // Wait for receiver acknowledgement
+            ret = readSupervisionMessage(fd, buf);
+
+            // Verify correct receiver message type
+            if (ret != MSG_SUPERVISION_MSG_SIZE || buf[MSG_CTRL_IDX] != MSG_CTRL_UA) {
+                continue;
+            }
+            else {
+                // TODO: Find out what to do with connection id
+                return 1;
+            }
         }
 
-        // Wait for receiver acknowledgement
-        ret = readSupervisionMessage(fd, buf);
-
-        if (ret != MSG_SUPERVISION_MSG_SIZE) {
-            return READ_SUPERVISION_MSG_FAILED;
-        }
-        // Verify correct receiver message type
-        else if (buf[MSG_CTRL_IDX] != MSG_CTRL_UA) {
-            return INVALID_RECEIVER_ACKNOWLEDGEMENT;
-        }
+        return ESTABLISH_DATA_CONNECTION_FAILED;        
     }
     else if (role == RECEIVER) {
         // Wait until transmitter tries to start communication
@@ -44,7 +51,7 @@ int llopen(int fd, byte role) {
         return INVALID_COMMUNICATION_ROLE;
     }
 
-    // TODO: Find out what "data connection identifier" means
+    // TODO: Find out what to do with connection id
     return 1;
 }
 
