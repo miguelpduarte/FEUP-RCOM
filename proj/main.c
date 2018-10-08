@@ -59,7 +59,9 @@ int main(int argc, char **argv) {
         exit(-2);
     }
 
-    int isEmitter = atoi(argv[1]);
+    int isEmitter = atoi(argv[1]);   
+
+    // int spaghet = llwrite(serial_port_fd, NULL, banana);
 
     int ret = llopen(serial_port_fd, isEmitter == EMITTER);
 

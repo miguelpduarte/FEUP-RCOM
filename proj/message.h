@@ -2,7 +2,7 @@
 #define _MESSAGE_
 
 #include "message_defines.h"
-#include "state.h"
+#include <stdlib.h>
 
 /**
  *  @brief writes a supervision message to the data connection
@@ -12,6 +12,8 @@
  *  @return number of bytes written, negative number of failure
  */
 int writeSupervisionMessage(int fd, byte msg_addr, byte msg_ctrl);
+
+int writeInfoMessage(int fd, byte msg_addr, byte msg_ctrl, byte * data, size_t data_size);
 
 /**
  *  @brief reads a supervision message from the data connection

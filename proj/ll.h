@@ -2,6 +2,7 @@
 #define _LL_
 
 #include "message_defines.h"
+#include <stdlib.h>
 
 #define EMITTER     0
 #define RECEIVER    1
@@ -34,7 +35,7 @@ int llclose(int fd);
  * @param   length  buffer message number of bytes
  * @return  number of written bytes, negative number on failure
 */
-int llwrite(int fd, byte* buffer, int length);
+int llwrite(int fd, byte* buffer, size_t length);
 
 
 /**

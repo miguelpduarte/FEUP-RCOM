@@ -1,4 +1,4 @@
-#include "state.h"
+#include "supervision_state.h"
 
 static void handleWaitingFlag(byte msg_byte);
 static void handleFlagReceived(byte msg_byte);

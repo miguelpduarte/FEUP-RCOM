@@ -1,5 +1,5 @@
-#ifndef _STATE_
-#define _STATE_
+#ifndef _SUPERVISION_STATE_
+#define _SUPERVISION_STATE_
 
 #include "message_defines.h"
 
@@ -15,4 +15,4 @@ state_st getState();
 
 void handleMsgByte(byte msg_byte);
 
-#endif /* _STATE_ */
+#endif /* _SUPERVISION_STATE_ */

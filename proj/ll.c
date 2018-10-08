@@ -1,6 +1,7 @@
 #include "ll.h"
 #include "message.h"
 #include "message_defines.h"
+#include <stdlib.h>
 
 int llopen(int fd, byte role) {
     byte buf[MSG_SUPERVISION_MSG_SIZE];
@@ -45,4 +46,17 @@ int llopen(int fd, byte role) {
 
     // TODO: Find out what "data connection identifier" means
     return 1;
+}
+
+int llwrite(int fd, byte* buffer, size_t length) {
+
+    //Partes a mensagem
+
+    //Transmites bocado a bocado
+    //manda 0
+    //manda 1
+    //manda 2
+
+
+    return writeInfoMessage(fd, 0, 69, buffer, length);
 }
