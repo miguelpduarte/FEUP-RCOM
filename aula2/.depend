@@ -1,6 +1,0 @@
-#MAKE .DEPEND FILE
-state.o: state.c state.h message_defines.h
-message.o: message.c message.h message_defines.h state.h
-ll.o: ll.c ll.h message_defines.h message.h state.h
-emitter.o: emitter.c ll.h message_defines.h
-receiver.o: receiver.c ll.h message_defines.h
