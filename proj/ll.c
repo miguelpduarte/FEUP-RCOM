@@ -5,7 +5,7 @@
 int llopen(int fd, byte role) {
     byte buf[MSG_SUPERVISION_MSG_SIZE];
 
-    if (role == TRANSMITTER) {
+    if (role == EMITTER) {
         // Attempt to establish data connection
         int ret = writeSupervisionMessage(fd, MSG_ADDR_EMT, MSG_CTRL_SET);
         if (ret != MSG_SUPERVISION_MSG_SIZE) {

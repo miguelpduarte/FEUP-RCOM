@@ -3,7 +3,7 @@
 
 #include "message_defines.h"
 
-#define TRANSMITTER 0
+#define EMITTER     0
 #define RECEIVER    1
 
 // Errors

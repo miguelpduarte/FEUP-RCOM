@@ -16,8 +16,9 @@
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
 int main(int argc, char **argv) {
-    if (argc != 1) {
-        printf("Usage: %s", argv[0]);
+    //1 = emitter, 0 = receiver
+    if (argc != 2) {
+        printf("Usage: %s <isEmitter?>\n", argv[0]);
         exit(1);
     }
 
@@ -55,26 +56,26 @@ int main(int argc, char **argv) {
 
     if (tcsetattr(serial_port_fd, TCSANOW, &new_termio) == -1) {
         perror("tcsetattr");
-        exit(-1);
+        exit(-2);
     }
 
-    int ret = llopen(serial_port_fd, TRANSMITTER);
-    
+    int ret = llopen(serial_port_fd, argv[1] == EMITTER ? EMITTER : RECEIVER);
+
     if (ret < 0) {
         fprintf(stderr, "llopen() function failed\n");
-        exit(-4);
-    }
-    else {
+        exit(-3);
+    } else {
         printf("llopen() successful: %d.\n", ret);
     }
-    
+
     sleep(2);
 
     if (tcsetattr(serial_port_fd, TCSANOW, &old_termio) == -1) {
         perror("tcsetattr reset");
-        exit(-1);
+        exit(-4);
     }
 
     close(serial_port_fd);
-    return 0;
+
+    return 0;    
 }
