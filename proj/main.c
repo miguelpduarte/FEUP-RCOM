@@ -10,22 +10,36 @@
 #include <strings.h>
 
 #include "ll.h"
+#include "message_defines.h" //TODO: REMOVE
 
 #define BAUDRATE B38400
 #define SERIAL_PORT "/dev/ttyS0"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
 int main(int argc, char **argv) {
+    byte data[25] = {0x7e, 0x7e, 0x3, 0x7d, 0x5, 0x7e, 0x7e, 0x3, 0x7d, 0x5, 0x7e, 0x7e, 0x3, 0x7d, 0x5, 0x7e, 0x7e, 0x3, 0x7d, 0x5, 0x7e, 0x7e, 0x3, 0x7d, 0x5};
+    byte stuff[MSG_STUFFING_BUFFER_SIZE];
+
+    size_t num_bits_stuffed;
+    size_t i=0, j, ret;
+    do {
+        ret = stuffMessage(data, 25, i, stuff, &num_bits_stuffed);
+        printf("Ret: %d\nMessage:\n", ret);
+
+        for (j=0 ; j<ret ; j++) {
+            printf("%X\n", stuff[j]);
+        }
+        printf("\n");
+
+        i += num_bits_stuffed;
+    } while(i < 25);
+
+/* 
     //1 = emitter, 0 = receiver
     if (argc != 2) {
         printf("Usage: %s <isEmitter?>\n", argv[0]);
         exit(1);
     }
-
-    /*
-    Open serial port device for reading and writing and not as controlling tty
-    because we don't want to get killed if linenoise sends CTRL-C.
-  */
 
     int serial_port_fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY);
     if (serial_port_fd < 0) {
@@ -80,6 +94,6 @@ int main(int argc, char **argv) {
     }
 
     close(serial_port_fd);
-
+ */
     return 0;    
 }

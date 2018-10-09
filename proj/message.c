@@ -4,8 +4,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-static byte calcBcc2(byte * data, const size_t data_size);
-
 int writeSupervisionMessage(int fd, byte msg_addr, byte msg_ctrl) {
     byte msg_buf[MSG_SUPERVISION_MSG_SIZE];
 
@@ -18,7 +16,7 @@ int writeSupervisionMessage(int fd, byte msg_addr, byte msg_ctrl) {
     return write(fd, msg_buf, MSG_SUPERVISION_MSG_SIZE);
 }
 
-int writeInfoMessage(int fd, byte msg_addr, byte msg_nr, byte * data, size_t data_size) {
+int writeInfoMessage(int fd, byte msg_addr, byte msg_nr, byte bcc2, byte * data, size_t data_size) {
     if(data_size == 0) {
         return -1;
     }
@@ -34,23 +32,12 @@ int writeInfoMessage(int fd, byte msg_addr, byte msg_nr, byte * data, size_t dat
         msg_buf[MSG_DATA_BASE_IDX + i] = data[i];
     }
 
-    msg_buf[MSG_BCC2_IDX(data_size)] = calcBcc2(data, data_size);
+    msg_buf[MSG_BCC2_IDX(data_size)] = bcc2;
     msg_buf[MSG_INFO_FLAG_END_IDX(data_size)] = MSG_FLAG;
 
     int ret = write(fd, msg_buf, MSG_INFO_MSG_SIZE(data_size));
     free(msg_buf);
     return ret;
-}
-
-static byte calcBcc2(byte * data, const size_t data_size) {
-    size_t i = 1;
-    byte bcc2 = data[0];
-
-    for(; i < data_size; ++i) {
-        bcc2 ^= data[i];
-    }
-
-    return bcc2;
 }
 
 int readSupervisionMessage(int fd, byte* buffer) {

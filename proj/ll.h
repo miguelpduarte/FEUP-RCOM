@@ -45,4 +45,6 @@ int llwrite(int fd, byte* buffer, size_t length);
 */
 int llread(int fd, byte* buffer);
 
+size_t stuffMessage(byte * data, const size_t data_size, const size_t data_start_index, byte * stuffed_buffer, size_t * num_bits_stuffed);
+
 #endif /* _LL_ */

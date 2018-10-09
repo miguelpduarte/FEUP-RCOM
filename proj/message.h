@@ -13,7 +13,7 @@
  */
 int writeSupervisionMessage(int fd, byte msg_addr, byte msg_ctrl);
 
-int writeInfoMessage(int fd, byte msg_addr, byte msg_ctrl, byte * data, size_t data_size);
+int writeInfoMessage(int fd, byte msg_addr, byte msg_ctrl, byte bcc2, byte * data, size_t data_size);
 
 /**
  *  @brief reads a supervision message from the data connection
