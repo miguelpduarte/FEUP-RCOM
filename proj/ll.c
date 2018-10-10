@@ -68,7 +68,7 @@ int llwrite(int fd, byte* buffer, size_t length) {
     data_stuffing_t ds;
     byte stuffed_data_buffer[MSG_STUFFING_BUFFER_SIZE];
     for (i = 0; i < num_messages; i++) {        
-        ds = stuffData(buffer, length, i*MSG_PART_MAX_SIZE, stuffed_data_buffer);
+        ds = stuffData(buffer, length, num_bytes_written, stuffed_data_buffer);
         bcc2 = calcBcc2(buffer, ds.data_bytes_stuffed, i*MSG_PART_MAX_SIZE);
         num_bytes_written += ds.data_bytes_stuffed;
         /* 
