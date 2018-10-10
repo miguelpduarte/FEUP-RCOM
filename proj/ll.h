@@ -10,6 +10,11 @@ typedef struct {
     size_t stuffed_buffer_size;
 } data_stuffing_t;
 
+typedef struct {
+    size_t data_bytes_unstuffed;
+    size_t unstuffed_buffer_size;
+} data_unstuffing_t;
+
 
 #define EMITTER     0
 #define RECEIVER    1
@@ -52,6 +57,8 @@ int llwrite(int fd, byte* buffer, size_t length);
 */
 int llread(int fd, byte* buffer);
 
-data_stuffing_t stuffMessage(byte * data, const size_t data_size, const size_t data_start_index, byte * stuffed_buffer);
+data_stuffing_t stuffData(byte * data, const size_t data_size, const size_t data_start_index, byte * stuffed_buffer);
+
+data_unstuffing_t unstuffData(byte * data, const size_t data_size, const size_t data_start_index, byte * unstuffed_buffer);
 
 #endif /* _LL_ */
