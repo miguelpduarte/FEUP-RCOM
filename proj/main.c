@@ -17,21 +17,22 @@
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
 int main(int argc, char **argv) {
-    byte data[25] = {0x7e, 0x7e, 0x3, 0x7d, 0x5, 0x7e, 0x7e, 0x3, 0x7d, 0x5, 0x7e, 0x7e, 0x3, 0x7d, 0x5, 0x7e, 0x7e, 0x3, 0x7d, 0x5, 0x7e, 0x7e, 0x3, 0x7d, 0x5};
+    byte data[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x1, 0x2, 0x3, 0x7e, 0x5, 0x1, 0x2, 0x3, 0x4, 0x5, 0x1, 0x2, 0x3, 0x4, 0x5, 0x1, 0x2, 0x3, 0x4, 0x5};
     byte stuff[MSG_STUFFING_BUFFER_SIZE];
 
-    size_t num_bits_stuffed;
-    size_t i=0, j, ret;
+    data_stuffing_t ds;
+    size_t i=0, j;
     do {
-        ret = stuffMessage(data, 25, i, stuff, &num_bits_stuffed);
-        printf("Ret: %d\nMessage:\n", ret);
+        ds = stuffMessage(data, 25, i, stuff);
+        printf("Num bytes stuffed: %d\n", ds.data_bytes_stuffed);
+        printf("Stuffed buffer size: %d\n", ds.stuffed_buffer_size);
 
-        for (j=0 ; j<ret ; j++) {
+        for (j=0 ; j<ds.stuffed_buffer_size ; j++) {
             printf("%X\n", stuff[j]);
         }
         printf("\n");
 
-        i += num_bits_stuffed;
+        i += ds.data_bytes_stuffed;
     } while(i < 25);
 
 /* 

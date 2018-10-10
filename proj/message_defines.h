@@ -44,8 +44,9 @@
 #define MSG_NUM_READ_TRIES              3                   /* Number of times reading the response is tried. After these number of tries, abort */
 #define MSG_SUPERVISION_MSG_SIZE        5                   /* Size of the supervision message */   
 #define MSG_INFO_MSG_SIZE(data_size)    ((data_size) + 6)   /* Size of the information message */
-#define MSG_PART_MAX_SIZE               10
-#define MSG_STUFFING_BUFFER_SIZE        20    /* MSG_MAX_SIZE*2   TODO: deveria ser este valor - 6, por causa dos flag, control, ... bits ? */
+#define MSG_PART_MAX_SIZE               4096
+#define MSG_STUFFING_BUFFER_SIZE        8192        /* MSG_MAX_SIZE*2  */
+#define MSG_INFO_RECEIVER_BUFFER_SIZE   8198        /* MSG_STUFFING_BUFFER_SIZE + 6 */
 
 //other
 typedef unsigned char byte;
