@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-static byte calcBcc2(byte * data, const size_t data_size);
+static byte calcBcc2(byte * data, const size_t data_size, const size_t data_start_index);
 
 int llopen(int fd, byte role) {
     byte buf[MSG_SUPERVISION_MSG_SIZE];
@@ -59,7 +59,33 @@ int llopen(int fd, byte role) {
 }
 
 int llwrite(int fd, byte* buffer, size_t length) {
+    size_t num_messages = (length / MSG_PART_MAX_SIZE) + ((length % MSG_PART_MAX_SIZE) != 0);
+    size_t i, num_bytes_written = 0;
+    byte bcc2;
 
+    size_t j;
+
+    data_stuffing_t ds;
+    byte stuffed_data_buffer[MSG_STUFFING_BUFFER_SIZE];
+    for (i = 0; i < num_messages; i++) {        
+        ds = stuffData(buffer, length, i*MSG_PART_MAX_SIZE, stuffed_data_buffer);
+        bcc2 = calcBcc2(buffer, ds.data_bytes_stuffed, i*MSG_PART_MAX_SIZE);
+        num_bytes_written += ds.data_bytes_stuffed;
+        /* 
+            Estas operações estão a ser feitas corretamente, já testei com vários valores
+            Agora deve ser feito o envio da mensagem em si e reenvio / prosseguir
+        */
+
+
+        printf("\nIteration #%d: bytes [%d , %d]\n[", i, i*MSG_PART_MAX_SIZE, num_bytes_written);
+        for (j=0 ; j<ds.stuffed_buffer_size ; j++) {
+            printf("%d ", stuffed_data_buffer[j]);
+        }
+        printf("]\n");
+    }
+
+    printf("\nEND\n");
+    
     //Partes a mensagem
 
     //Transmites bocado a bocado
@@ -76,11 +102,11 @@ int llwrite(int fd, byte* buffer, size_t length) {
     return -1;
 }
 
-static byte calcBcc2(byte * data, const size_t data_size) {
-    size_t i = 1;
-    byte bcc2 = data[0];
+static byte calcBcc2(byte * data, const size_t data_size, const size_t data_start_index) {
+    byte bcc2 = data[data_start_index];
+    size_t i = data_start_index + 1;
 
-    for(; i < data_size; ++i) {
+    for(; i < data_start_index + data_size; ++i) {
         bcc2 ^= data[i];
     }
 

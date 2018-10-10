@@ -4,18 +4,6 @@
 #include "message_defines.h"
 #include <stdlib.h>
 
-
-typedef struct {
-    size_t data_bytes_stuffed;
-    size_t stuffed_buffer_size;
-} data_stuffing_t;
-
-typedef struct {
-    size_t data_bytes_unstuffed;
-    size_t unstuffed_buffer_size;
-} data_unstuffing_t;
-
-
 #define EMITTER     0
 #define RECEIVER    1
 

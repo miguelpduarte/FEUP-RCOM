@@ -17,6 +17,24 @@
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
 int main(int argc, char **argv) {
+    byte buf[] = {
+        1,2,3,4,5,6,7,0x7e,9,0x7d,
+        1,2,3,4,5,6,7,0x7e,9,0x7d,
+        1,2,3,4,5,6,7,0x7e,9,0x7d,
+        1,2,3,4,5,6,7,0x7e
+    };
+
+    llwrite(1, buf, 38);
+
+
+
+    return 0;
+
+
+
+
+
+
     byte data[10] = {0x1, 0x2, 0x7e, 0x7e, 0x3, 0x4, 0x5, 0x7d, 0x6, 0x7};
     byte stuff[MSG_STUFFING_BUFFER_SIZE];
 
