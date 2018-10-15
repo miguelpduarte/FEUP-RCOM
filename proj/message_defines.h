@@ -32,6 +32,8 @@
 #define MSG_CTRL_REJ_DECODE(b)  ((b) >> 7);
 #define MSG_CTRL_IDX            2
 #define MSG_CTRL_S(s)           (((s) % 2) << 6)            /* Message number to S control byte */
+#define MSG_CTRL_S0             0
+#define MSG_CTRL_S1             0x40
 
 
 //bcc
@@ -71,7 +73,7 @@ typedef struct {
 #define MSG_INFO_MSG_SIZE(data_size)    ((data_size) + 6)   /* Size of the information message */
 #define MSG_PART_MAX_SIZE               4096
 #define MSG_STUFFING_BUFFER_SIZE        8192        /* MSG_MAX_SIZE*2  */
-#define MSG_INFO_RECEIVER_BUFFER_SIZE   8198        /* MSG_STUFFING_BUFFER_SIZE + 6 */
+#define MSG_INFO_RECEIVER_BUFFER_SIZE   8193        /* MSG_STUFFING_BUFFER_SIZE + 1 */
 
 
 //other

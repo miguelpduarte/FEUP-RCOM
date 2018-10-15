@@ -5,17 +5,17 @@ static void handleFlagReceived(byte msg_byte);
 static void handleAddrReceived(byte msg_byte);
 static void handleCtrlReceived(byte msg_byte);
 static void handleBccOk(byte msg_byte);
-static void setState(state_st new_state);
+static void setState(supervision_state_st new_state);
 
-static state_machine_st state_machine = (state_machine_st){.current_state = WAITING_FLAG};
+static supervision_state_machine_st state_machine = (supervision_state_machine_st){.current_state = WAITING_FLAG};
 
-state_st getState() {
+supervision_state_st getState() {
     return state_machine.current_state;
 }
 
 // WAITING_FLAG, FLAG_RCV, ADDR_RCV, CTRL_RCV, BCC_OK, MSG_RECEIVED
 
-void handleMsgByte(byte msg_byte) {
+void handleSupMsgByte(byte msg_byte) {
     switch (state_machine.current_state) {
         case WAITING_FLAG:
             handleWaitingFlag(msg_byte);
@@ -106,6 +106,6 @@ static void handleBccOk(byte msg_byte) {
     }
 }
 
-static void setState(state_st new_state) {
+static void setState(supervision_state_st new_state) {
     state_machine.current_state = new_state;
 }
