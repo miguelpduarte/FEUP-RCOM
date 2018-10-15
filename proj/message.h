@@ -28,4 +28,6 @@ int writeInfoMessage(int fd, const info_message_details_t info_message_details, 
  */
 int readSupervisionMessage(int fd, byte* buffer);
 
+byte readInfoMsgResponse(int fd, byte msg_nr_S);
+
 #endif /* _MESSAGE_ */

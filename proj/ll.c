@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 static byte calcBcc2(byte * data, const size_t data_size, const size_t data_start_index);
-static int writeAndRetry(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size) {
+static int writeAndRetry(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size);
 
 int llopen(int fd, byte role) {
     byte buf[MSG_SUPERVISION_MSG_SIZE];
@@ -26,16 +26,14 @@ int llopen(int fd, byte role) {
             // Verify correct receiver message type
             if (ret != MSG_SUPERVISION_MSG_SIZE || buf[MSG_CTRL_IDX] != MSG_CTRL_UA) {
                 continue;
-            }
-            else {
+            } else {
                 // TODO: Find out what to do with connection id
                 return 1;
             }
         }
 
         return ESTABLISH_DATA_CONNECTION_FAILED;        
-    }
-    else if (role == RECEIVER) {
+    } else if (role == RECEIVER) {
         // Wait until transmitter tries to start communication
         int ret;
         do {
@@ -50,8 +48,7 @@ int llopen(int fd, byte role) {
         if (ret != MSG_SUPERVISION_MSG_SIZE) {
             return WRITE_SUPERVISION_MSG_FAILED;
         }        
-    }
-    else {
+    } else {
         return INVALID_COMMUNICATION_ROLE;
     }
 
@@ -60,26 +57,28 @@ int llopen(int fd, byte role) {
 }
 
 int llwrite(int fd, byte* buffer, const size_t length) {
-    size_t i, num_bytes_written = 0;
-    byte bcc2;
-
+    size_t num_bytes_written = 0;
     data_stuffing_t ds;
+
+    info_message_details_t msg_details;
+    msg_details.msg_nr = 0;
+    msg_details.addr = MSG_ADDR_EMT;
+
     byte stuffed_data_buffer[MSG_STUFFING_BUFFER_SIZE];
-    int current_message_number = 0;
 
     do {
         ds = stuffData(buffer, length, num_bytes_written, stuffed_data_buffer);
-        bcc2 = calcBcc2(buffer, ds.data_bytes_stuffed, num_bytes_written);
+        msg_details.bcc2 = calcBcc2(buffer, ds.data_bytes_stuffed, num_bytes_written);
         
         //Updating current "index" in data buffer
         num_bytes_written += ds.data_bytes_stuffed;
 
         //Write message and proceed accordingly to return
-        if(writeAndRetry(fd, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
+        if(writeAndRetry(fd, msg_details, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
             return LLWRITE_FAILED;
         }
 
-        current_message_number++;
+        msg_details.msg_nr++;
 
     } while(num_bytes_written < length);
 
@@ -151,7 +150,6 @@ data_stuffing_t stuffData(byte * data, const size_t data_size, const size_t data
 
 data_unstuffing_t unstuffData(byte * data, const size_t data_size, const size_t data_start_index, byte * unstuffed_buffer) {
     size_t data_index = data_start_index, unstuffed_buffer_index = 0;
-    size_t num_loops = MIN(MSG_PART_MAX_SIZE, (ssize_t) (data_size - data_start_index));
 
     while(unstuffed_buffer_index < MSG_PART_MAX_SIZE && data_index < data_size) {
         if (data[data_index] == MSG_ESCAPE_BYTE) {
