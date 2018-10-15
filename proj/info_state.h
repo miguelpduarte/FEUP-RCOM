@@ -3,7 +3,7 @@
 
 #include "message_defines.h"
 
-typedef enum {WAITING_FLAG=0, FLAG_RCV, ADDR_RCV, CTRL_RCV, BCC_OK, RECEIVING_DATA, MSG_RECEIVED} state_st;
+typedef enum {WAITING_FLAG=0, FLAG_RCV, ADDR_RCV, CTRL_RCV, BCC_OK, RECEIVING_DATA, FINAL_FLAG_RCV, BCC2_OK} state_st;
 
 typedef struct {
     state_st current_state;

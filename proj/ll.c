@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 static byte calcBcc2(byte * data, const size_t data_size, const size_t data_start_index);
+static int writeAndRetry(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size) {
 
 int llopen(int fd, byte role) {
     byte buf[MSG_SUPERVISION_MSG_SIZE];
@@ -58,48 +59,60 @@ int llopen(int fd, byte role) {
     return 1;
 }
 
-int llwrite(int fd, byte* buffer, size_t length) {
-    size_t num_messages = (length / MSG_PART_MAX_SIZE) + ((length % MSG_PART_MAX_SIZE) != 0);
+int llwrite(int fd, byte* buffer, const size_t length) {
     size_t i, num_bytes_written = 0;
     byte bcc2;
 
-    size_t j;
-
     data_stuffing_t ds;
     byte stuffed_data_buffer[MSG_STUFFING_BUFFER_SIZE];
-    for (i = 0; i < num_messages; i++) {        
+    int current_message_number = 0;
+
+    do {
         ds = stuffData(buffer, length, num_bytes_written, stuffed_data_buffer);
-        bcc2 = calcBcc2(buffer, ds.data_bytes_stuffed, i*MSG_PART_MAX_SIZE);
+        bcc2 = calcBcc2(buffer, ds.data_bytes_stuffed, num_bytes_written);
+        
+        //Updating current "index" in data buffer
         num_bytes_written += ds.data_bytes_stuffed;
-        /* 
-            Estas operações estão a ser feitas corretamente, já testei com vários valores
-            Agora deve ser feito o envio da mensagem em si e reenvio / prosseguir
-        */
 
-
-        printf("\nIteration #%d: bytes [%d , %d]\n[", i, i*MSG_PART_MAX_SIZE, num_bytes_written);
-        for (j=0 ; j<ds.stuffed_buffer_size ; j++) {
-            printf("%d ", stuffed_data_buffer[j]);
+        //Write message and proceed accordingly to return
+        if(writeAndRetry(fd, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
+            return LLWRITE_FAILED;
         }
-        printf("]\n");
-    }
 
-    printf("\nEND\n");
-    
-    //Partes a mensagem
+        current_message_number++;
 
-    //Transmites bocado a bocado
-    //manda 0:
-        //fazer paridade da informação -> Bcc2
-        //fazer stuffing
-        //enviar para o writeInfoMessage
-    //manda 1
-        //fazer paridade da informação -> Bcc2
-        //fazer stuffing
-        //enviar para o writeInfoMessage
-    //manda 2
+    } while(num_bytes_written < length);
 
-    return -1;
+    return 0;
+}
+
+static int writeAndRetry(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size) {
+    int current_attempt = 0;
+    int response = 0, num_bytes_written;
+    const byte msg_nr_S = MSG_CTRL_S(info_message_details.msg_nr);
+
+    do {
+        current_attempt++;
+
+        num_bytes_written = writeInfoMessage(fd, info_message_details, stuffed_data, stuffed_data_size);
+        if(num_bytes_written != stuffed_data_size) {
+            //Oh shit, the whole message was not written
+            //current_attempt++;
+            //continue; Should we just re-write? - confirm with teacher
+        }
+
+        response = readInfoMsgResponse(fd, msg_nr_S);
+        //this if is ugly, for clarity
+        if(response == msg_nr_S) {
+            //resend msg
+            continue;
+        } else {
+            return 0;
+        }
+
+    } while(current_attempt < MSG_NUM_RESEND_TRIES);
+
+    return 1;    
 }
 
 static byte calcBcc2(byte * data, const size_t data_size, const size_t data_start_index) {

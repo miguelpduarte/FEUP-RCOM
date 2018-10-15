@@ -19,13 +19,19 @@
 
 
 //control
-#define MSG_CTRL_SET    0x03                        /* Setup */
-#define MSG_CTRL_DISC   0x0B                        /* Disconnect */
-#define MSG_CTRL_UA     0x07                        /* Unnumbered Acknowledgement */
-#define MSG_CTRL_RR(r)  0x05 | (r ? BIT(7) : 0x00)  /* Receiver Ready (positive ACK) */
-#define MSG_CTRL_REJ(r) 0x01 | (r ? BIT(7) : 0x00)  /* Reject (negative ACK) */
-#define MSG_CTRL_IDX    2
-#define MSG_CTRL_S(s)   (((s) % 2) << 6)            /* Message number to S control byte */
+#define MSG_CTRL_SET            0x03                        /* Setup */
+#define MSG_CTRL_DISC           0x0B                        /* Disconnect */
+#define MSG_CTRL_UA             0x07                        /* Unnumbered Acknowledgement */
+#define MSG_CTRL_RR(r)          0x05 | (r ? BIT(7) : 0x00)  /* Receiver Ready (positive ACK) */
+#define MSG_CTRL_RR_0           0x05
+#define MSG_CTRL_RR_1           0x85
+#define MSG_CTRL_RR_DECODE(b)   ((b) >> 7);
+#define MSG_CTRL_REJ(r)         0x01 | (r ? BIT(7) : 0x00)  /* Reject (negative ACK) */
+#define MSG_CTRL_REJ_0          0x01
+#define MSG_CTRL_REJ_1          0x81
+#define MSG_CTRL_REJ_DECODE(b)  ((b) >> 7);
+#define MSG_CTRL_IDX            2
+#define MSG_CTRL_S(s)           (((s) % 2) << 6)            /* Message number to S control byte */
 
 
 //bcc
@@ -60,11 +66,12 @@ typedef struct {
                                                     if a single character is read, or TIME is exceeded (t = TIME *0.1 s). If TIME is 
                                                     exceeded, no character will be returned */
 #define MSG_NUM_READ_TRIES              3                   /* Number of times reading the response is tried. After these number of tries, abort */
+#define MSG_NUM_RESEND_TRIES            3                   /* Number of times trying to send a frame. After these number of tries, abort */
 #define MSG_SUPERVISION_MSG_SIZE        5                   /* Size of the supervision message */   
 #define MSG_INFO_MSG_SIZE(data_size)    ((data_size) + 6)   /* Size of the information message */
-#define MSG_PART_MAX_SIZE               10
-#define MSG_STUFFING_BUFFER_SIZE        20        /* MSG_MAX_SIZE*2  */
-#define MSG_INFO_RECEIVER_BUFFER_SIZE   14        /* MSG_STUFFING_BUFFER_SIZE + 6 */
+#define MSG_PART_MAX_SIZE               4096
+#define MSG_STUFFING_BUFFER_SIZE        8192        /* MSG_MAX_SIZE*2  */
+#define MSG_INFO_RECEIVER_BUFFER_SIZE   8198        /* MSG_STUFFING_BUFFER_SIZE + 6 */
 
 
 //other

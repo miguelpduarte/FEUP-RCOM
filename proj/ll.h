@@ -11,6 +11,7 @@
 #define WRITE_SUPERVISION_MSG_FAILED        -1
 #define INVALID_COMMUNICATION_ROLE          -2
 #define ESTABLISH_DATA_CONNECTION_FAILED    -3
+#define LLWRITE_FAILED                      -4
 
 /**
  * @brief   opens data connection connection
@@ -34,7 +35,7 @@ int llclose(int fd);
  * @param   length  buffer message number of bytes
  * @return  number of written bytes, negative number on failure
 */
-int llwrite(int fd, byte* buffer, size_t length);
+int llwrite(int fd, byte* buffer, const size_t length);
 
 
 /**
