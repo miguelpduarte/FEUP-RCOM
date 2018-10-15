@@ -1,4 +1,5 @@
 #include "state.h"
+#include "utils.h"
 
 static void setState(state_st new_state);
 
@@ -8,15 +9,19 @@ static void handleAddrReceived(byte msg_byte);
 
 static void handleSupCtrlReceived(byte msg_byte);
 static void handleBccOk(byte msg_byte);
+static void handleReceivingData(byte msg_byte);
+static void handleInfoCtrlReceived(byte msg_byte);
+static void handleFinalFlagRcv();
 
 static state_machine_st state_machine = (state_machine_st){.msg_index = 0, .current_state = WAITING_FLAG};
 
 byte * getInfoMsgBuffer(size_t * msg_size) {
-    //Because we are ignoring the bcc2 which will end up in the buffer
+    //Ignoring the bcc2 which will end up in the buffer
     *msg_size = state_machine.msg_index - 1;
+    return state_machine.msg;
 }
 
-state_st getInfoMsgState() {
+state_st getState() {
     return state_machine.current_state;
 }
 
@@ -28,22 +33,6 @@ void resetMsgState() {
     state_machine.current_state = WAITING_FLAG;
     state_machine.msg_index = 0;
 }
-
-/*
-    WAITING_FLAG=0,
-    FLAG_RCV,
-    ADDR_RCV,
-
-    SUP_CTRL_RCV,
-    SUP_BCC_OK,
-    SUP_MSG_RECEIVED,
-
-    INFO_CTRL_RCV,
-    RECEIVING_DATA,
-
-    MSG_ERROR,          //Message error, send respective REJ
-    INFO_MSG_RECEIVED   //Message received successfully
-*/
 
 static void setState(state_st new_state) {
     state_machine.current_state = new_state;
@@ -191,24 +180,11 @@ static void handleReceivingData(byte msg_byte) {
 
 static void handleFinalFlagRcv() {
     byte bcc2 = state_machine.msg[state_machine.msg_index - 1];
-    //Check bcc2
-    byte calculatedBcc2 = calcBcc2(state_machine.msg, state_machine.msg_index - 1);
+    byte calculatedBcc2 = calcBcc2(state_machine.msg, state_machine.msg_index - 1, 0);
 
-    if(bcc2 == calculatedBcc2) {
+    if (bcc2 == calculatedBcc2) {
         setState(INFO_MSG_RECEIVED);
     } else {
         setState(MSG_ERROR);
     }
-}
-
-//TODO: Refactor or call function from elsewhere - utils file?
-static byte calcBcc2(byte * data, const size_t data_size) {
-    byte bcc2 = data[0];
-    size_t i = 1;
-
-    for(; i < data_size; ++i) {
-        bcc2 ^= data[i];
-    }
-
-    return bcc2;
 }

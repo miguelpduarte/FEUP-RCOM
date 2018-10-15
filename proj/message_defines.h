@@ -77,10 +77,6 @@ typedef struct {
 
 
 //other
-typedef unsigned char byte;
-#define MIN(x,y)    (((x) < (y)) ? (x) : (y))
-#define MAX(x,y)    (((x) > (y)) ? (x) : (y))
-
 #define DATA_SIZE_FROM_INFO_MSG_LENGTH(msg_length)      ((msg_length) - 6)
 
 

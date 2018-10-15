@@ -1,7 +1,7 @@
 #ifndef _MESSAGE_
 #define _MESSAGE_
 
-#include "message_defines.h"
+#include "utils.h"
 #include <stdlib.h>
 
 typedef struct {

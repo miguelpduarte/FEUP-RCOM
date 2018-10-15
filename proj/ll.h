@@ -2,6 +2,7 @@
 #define _LL_
 
 #include "message_defines.h"
+#include "utils.h"
 #include <stdlib.h>
 
 #define EMITTER     0

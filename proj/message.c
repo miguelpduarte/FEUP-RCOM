@@ -1,6 +1,7 @@
 #include "message.h"
 #include "message_defines.h"
-#include "supervision_state.h"
+#include "utils.h"
+#include "state.h"
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -62,7 +63,7 @@ byte readInfoMsgResponse(int fd, byte msg_nr_S) {
 int readSupervisionMessage(int fd, byte* buffer) {
     byte msg_byte;
     ssize_t ret;
-    while(getState() != MSG_RECEIVED) {
+    while(getState() != SUP_MSG_RECEIVED) {
         ret = read(fd, &msg_byte, 1);
 
         if (ret <= 0) {

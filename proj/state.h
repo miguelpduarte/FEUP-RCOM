@@ -2,6 +2,7 @@
 #define _INFO_STATE_
 
 #include "message_defines.h"
+#include "utils.h"
 
 typedef enum {
     WAITING_FLAG=0,

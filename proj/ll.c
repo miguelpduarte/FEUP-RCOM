@@ -3,8 +3,8 @@
 #include "message_defines.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include "utils.h"
 
-static byte calcBcc2(byte * data, const size_t data_size, const size_t data_start_index);
 static int writeAndRetry(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size);
 
 int llopen(int fd, byte role) {
@@ -112,17 +112,6 @@ static int writeAndRetry(const int fd, const info_message_details_t info_message
     } while(current_attempt < MSG_NUM_RESEND_TRIES);
 
     return 1;    
-}
-
-static byte calcBcc2(byte * data, const size_t data_size, const size_t data_start_index) {
-    byte bcc2 = data[data_start_index];
-    size_t i = data_start_index + 1;
-
-    for(; i < data_start_index + data_size; ++i) {
-        bcc2 ^= data[i];
-    }
-
-    return bcc2;
 }
 
 data_stuffing_t stuffData(byte * data, const size_t data_size, const size_t data_start_index, byte * stuffed_buffer) {
