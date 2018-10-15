@@ -47,8 +47,4 @@ int llwrite(int fd, byte* buffer, const size_t length);
 */
 int llread(int fd, byte* buffer);
 
-data_stuffing_t stuffData(byte * data, const size_t data_size, const size_t data_start_index, byte * stuffed_buffer);
-
-data_unstuffing_t unstuffData(byte * data, const size_t data_size, const size_t data_start_index, byte * unstuffed_buffer);
-
 #endif /* _LL_ */

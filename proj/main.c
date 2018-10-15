@@ -17,65 +17,7 @@
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
 int main(int argc, char **argv) {
-    byte buf[] = {
-        1,2,3,4,5,6,7,0x7e,9,0x7d,
-        1,2,3,4,5,6,7,0x7e,9,0x7d,
-        1,2,3,4,5,6,7,0x7e,9,0x7d,
-        1,2,3,4,5,6,7,0x7e
-    };
-
-    llwrite(1, buf, 38);
-
-
-
-    return 0;
-
-
-
-
-
-
-    byte data[10] = {0x1, 0x2, 0x7e, 0x7e, 0x3, 0x4, 0x5, 0x7d, 0x6, 0x7};
-    byte stuff[MSG_STUFFING_BUFFER_SIZE];
-
-    size_t i=0, j;
-    printf("\nSTARTING DATA:\n[");
-    for (i=0 ; i<10 ; i++) {
-        printf("%d ", data[i]);
-    }
-    printf("]\n");
-
-    data_stuffing_t ds;
-    /* do {
-        ds = stuffData(data, 10, i, stuff);
-        printf("Num bytes stuffed: %d\n", ds.data_bytes_stuffed);
-        printf("Stuffed buffer size: %d\n", ds.stuffed_buffer_size);
-
-        for (j=0 ; j<ds.stuffed_buffer_size ; j++) {
-            printf("%X\n", stuff[j]);
-        }
-        printf("\n");
-
-        i += ds.data_bytes_stuffed;
-    } while(i < 10); */
-    ds = stuffData(data, 10, 0, stuff);
-    printf("\nDATA AFTER STUFFING:\n[");
-    for (i=0 ; i<ds.stuffed_buffer_size ; i++) {
-        printf("%d ", stuff[i]);
-    }
-    printf("]\n");
-
-    byte unstuffed_data[MSG_PART_MAX_SIZE];
-
-    data_unstuffing_t dus;
-    dus = unstuffData(stuff, ds.stuffed_buffer_size, 0, unstuffed_data);
-    printf("\nDATA AFTER UN-STUFFING:\n[");
-    for (i=0 ; i<dus.unstuffed_buffer_size ; i++) {
-        printf("%d ", unstuffed_data[i]);
-    }
-    printf("]\n");
-
-/* 
+    
     //1 = emitter, 0 = receiver
     if (argc != 2) {
         printf("Usage: %s <isEmitter?>\n", argv[0]);
@@ -135,6 +77,6 @@ int main(int argc, char **argv) {
     }
 
     close(serial_port_fd);
- */
+
     return 0;    
 }

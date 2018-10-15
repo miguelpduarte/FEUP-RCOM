@@ -51,19 +51,8 @@
 #define MSG_FLAG_STUFFING_BYTE      0x5e    /* result of MSG_FLAG XOR 0x20 = 0x7E XOR 0x20 */
 #define MSG_ESCAPE_STUFFING_BYTE    0x5d    /* result of MSG_ESCAPE_BYTE XOR 0x20 = 0x7D XOR 0x20 */
 
-typedef struct {
-    size_t data_bytes_stuffed;
-    size_t stuffed_buffer_size;
-} data_stuffing_t;
-
-typedef struct {
-    size_t data_bytes_unstuffed;
-    size_t unstuffed_buffer_size;
-} data_unstuffing_t;
-
-
 //message configurations
-#define MSG_WAIT_TIME               30       /* Will wait 3 seconds */
+#define MSG_WAIT_TIME               30       /* In tens of seconds - Wait time in seconds = 0.1*T   */
 #define MSG_MIN_CHARS               0        /* If MIN = 0 and TIME > 0, TIME serves as a timeout value. The read will be satisfied 
                                                     if a single character is read, or TIME is exceeded (t = TIME *0.1 s). If TIME is 
                                                     exceeded, no character will be returned */
