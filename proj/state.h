@@ -26,8 +26,10 @@ typedef struct {
     state_st current_state;                     /** Current machine state */
     byte addr;                                  /** Message address */
     byte ctrl;                                  /** Message control octet */
-    byte msg[MSG_INFO_RECEIVER_BUFFER_SIZE];    /** Info message buffer */
     size_t msg_index;                           /** Info message buffer current index (size in bytes) */
+    byte msg[MSG_INFO_RECEIVER_BUFFER_SIZE];    /** Info message buffer (still stuffed message, containing stuffed BCC2) */
+    size_t unstuffed_msg_size;
+    byte unstuffed_msg[MSG_INFO_RECEIVER_UNSTUFFED_BUFFER_SIZE];
 } state_machine_st;
 
 /**
@@ -50,7 +52,7 @@ byte getMsgCtrl();
 void handleMsgByte(byte msg_byte);
 
 /**
- * @brief   retrieves the state machine information buffer (for info messages)
+ * @brief   retrieves the state machine information buffer (for info messages) - only data, unstuffed, and excludes bcc2
  * @param   msg_size    information buffer size, in bytes
  * @return  information buffer
  */

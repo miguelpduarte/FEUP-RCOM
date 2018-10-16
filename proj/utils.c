@@ -37,32 +37,29 @@ data_stuffing_t stuffData(byte * data, const size_t data_size, const size_t data
     return ds;
 }
 
-data_unstuffing_t unstuffData(byte * data, const size_t data_size, const size_t data_start_index, byte * unstuffed_buffer) {
-    size_t data_index = data_start_index, unstuffed_buffer_index = 0;
+size_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer) {
+    size_t data_index = 0, unstuffed_buffer_index = 0;
 
-    while(unstuffed_buffer_index < MSG_PART_MAX_SIZE && data_index < data_size) {
+    while(data_index < data_size) {
         if (data[data_index] == MSG_ESCAPE_BYTE) {
             data_index++;
+
             if (data[data_index] == MSG_FLAG_STUFFING_BYTE) {
                 unstuffed_buffer[unstuffed_buffer_index++] = MSG_FLAG;
             } else if (data[data_index] == MSG_ESCAPE_STUFFING_BYTE) {
                 unstuffed_buffer[unstuffed_buffer_index++] = MSG_ESCAPE_BYTE;
             } else {
+                printf("Found invalid byte after escape byte! Unsure on how to proceed!\n");
                 exit(-1);
             }
-        }
-        else {
+        } else {
             unstuffed_buffer[unstuffed_buffer_index++] = data[data_index];
         }
 
         data_index++;
     }
 
-    data_unstuffing_t dus;
-    dus.data_bytes_unstuffed = data_index - data_start_index;
-    dus.unstuffed_buffer_size = unstuffed_buffer_index;
-
-    return dus;
+    return unstuffed_buffer_index;
 }
 
 unsigned short stuffByte(byte b) {

@@ -61,9 +61,10 @@
 #define MSG_SUPERVISION_MSG_SIZE        5                   /* Size of the supervision message */   
 #define MSG_INFO_MSG_SIZE(data_size)    ((data_size) + 7)   /* Size of the information message:
                                                                Data size + Flag + Address + Control + BCC1 + BCC2(may be 2 bytes, if stuffing is needed) + FLAG */
-#define MSG_PART_MAX_SIZE               4096
-#define MSG_STUFFING_BUFFER_SIZE        8192        /* MSG_MAX_SIZE*2  */
-#define MSG_INFO_RECEIVER_BUFFER_SIZE   8193        /* MSG_STUFFING_BUFFER_SIZE + 1 */
+#define MSG_PART_MAX_SIZE                       4096
+#define MSG_STUFFING_BUFFER_SIZE                8192        /* MSG_MAX_SIZE*2  */
+#define MSG_INFO_RECEIVER_BUFFER_SIZE           8194        /* MSG_STUFFING_BUFFER_SIZE + 2 (bcc2 can be 2 bytes) */
+#define MSG_INFO_RECEIVER_UNSTUFFED_BUFFER_SIZE 4097 /* MSG_PART_MAX_SIZE + 1 (bcc2) */
 
 
 //other

@@ -13,12 +13,12 @@ static void handleReceivingData(byte msg_byte);
 static void handleInfoCtrlReceived(byte msg_byte);
 static void handleFinalFlagRcv();
 
-static state_machine_st state_machine = (state_machine_st){.msg_index = 0, .current_state = WAITING_FLAG};
+static state_machine_st state_machine = (state_machine_st){.msg_index = 0, .current_state = WAITING_FLAG, .unstuffed_msg_size = 0};
 
 byte * getInfoMsgBuffer(size_t * msg_size) {
     //Ignoring the bcc2 which will end up in the buffer
-    *msg_size = state_machine.msg_index - 1;
-    return state_machine.msg;
+    *msg_size = state_machine.unstuffed_msg_size - 1;
+    return state_machine.unstuffed_msg;
 }
 
 state_st getState() {
@@ -179,10 +179,17 @@ static void handleReceivingData(byte msg_byte) {
 }
 
 static void handleFinalFlagRcv() {
-    byte bcc2 = state_machine.msg[state_machine.msg_index - 1];
-    byte calculatedBcc2 = calcBcc2(state_machine.msg, state_machine.msg_index - 1, 0);
+    // First, unstuff the message
+    state_machine.unstuffed_msg_size = unstuffData(state_machine.msg, state_machine.msg_index, state_machine.unstuffed_msg);
 
-    if (bcc2 == calculatedBcc2) {
+    // Then, calculate the bcc2 of the unstuffed message
+    // (Subtracting 1 to not count bcc2 in the bcc2 calculation)
+    byte calculated_bcc2 = calcBcc2(state_machine.unstuffed_msg, state_machine.unstuffed_msg_size - 1);
+
+    // Finally, compare the calculated bcc2 to the final byte of the unstuffed message (received bcc2)
+    byte received_bcc2 = state_machine.unstuffed_msg[state_machine.unstuffed_msg_size - 1];
+
+    if (calculated_bcc2 == received_bcc2) {
         setState(INFO_MSG_RECEIVED);
     } else {
         setState(MSG_ERROR);
