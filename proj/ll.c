@@ -27,7 +27,6 @@ int llopen(int fd, byte role) {
             if (ret != MSG_SUPERVISION_MSG_SIZE || buf[MSG_CTRL_IDX] != MSG_CTRL_UA) {
                 continue;
             } else {
-                // TODO: Find out what to do with connection id
                 return 1;
             }
         }
@@ -52,7 +51,6 @@ int llopen(int fd, byte role) {
         return INVALID_COMMUNICATION_ROLE;
     }
 
-    // TODO: Find out what to do with connection id
     return 1;
 }
 
@@ -95,15 +93,11 @@ static int writeAndRetry(const int fd, const info_message_details_t info_message
 
         num_bytes_written = writeInfoMessage(fd, info_message_details, stuffed_data, stuffed_data_size);
         if(num_bytes_written != stuffed_data_size) {
-            //Oh shit, the whole message was not written
-            //current_attempt++;
-            //continue; Should we just re-write? - confirm with teacher
+            continue;
         }
 
         response = readInfoMsgResponse(fd, msg_nr_S);
-        //this if is ugly, for clarity
         if(response == msg_nr_S) {
-            //resend msg
             continue;
         } else {
             return 0;

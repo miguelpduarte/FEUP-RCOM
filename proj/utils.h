@@ -3,8 +3,10 @@
 
 #include <stdlib.h>
 
-#define MIN(x,y)    (((x) < (y)) ? (x) : (y))
-#define MAX(x,y)    (((x) > (y)) ? (x) : (y))
+#define MIN(x,y)        (((x) < (y)) ? (x) : (y))
+#define MAX(x,y)        (((x) > (y)) ? (x) : (y))
+#define SHORT_LSB(x)    ( (x) & 0x00FF)
+#define SHORT_MSB(x)    (((x) & 0xFF00) >> 8)
 
 typedef unsigned char byte;
 
@@ -48,5 +50,12 @@ data_stuffing_t stuffData(byte * data, const size_t data_size, const size_t data
  * @return  structure regarding the information of the unstuffing process (data bytes unstuffed and unstuffed buffer size)
  */
 data_unstuffing_t unstuffData(byte * data, const size_t data_size, const size_t data_start_index, byte * unstuffed_buffer);
+
+/**
+ * @brief   stuffs a data byte
+ * @param   b   data byte to be stuffed
+ * @return  16 bit stuffing result. If no stuffing occured, the MSB will be empty.
+ */
+unsigned short stuffByte(byte b);
 
 #endif // _UTILS_H_

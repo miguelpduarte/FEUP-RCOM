@@ -64,3 +64,17 @@ data_unstuffing_t unstuffData(byte * data, const size_t data_size, const size_t 
 
     return dus;
 }
+
+unsigned short stuffByte(byte b) {
+    unsigned short stuffedByte;
+
+    if (b == MSG_FLAG) {
+        stuffedByte = (MSG_ESCAPE_BYTE << 8) | MSG_FLAG_STUFFING_BYTE;
+    } else if (b == MSG_ESCAPE_BYTE) {
+        stuffedByte = (MSG_ESCAPE_BYTE << 8) | MSG_ESCAPE_STUFFING_BYTE;
+    } else {
+        stuffedByte = b;
+    }
+
+    return stuffedByte;
+}

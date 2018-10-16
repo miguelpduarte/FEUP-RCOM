@@ -33,8 +33,17 @@ int writeInfoMessage(int fd, const info_message_details_t info_message_details, 
         msg_buf[MSG_DATA_BASE_IDX + i] = data[i];
     }
 
-    msg_buf[MSG_BCC2_IDX(data_size)] = info_message_details.bcc2;
-    msg_buf[MSG_INFO_FLAG_END_IDX(data_size)] = MSG_FLAG;
+    unsigned short stuffedBcc2 = stuffByte(info_message_details.bcc2);
+
+    // If BCC2 needs stuffing, flag has to be shifted
+    if (SHORT_MSB(stuffedBcc2) == MSG_ESCAPE_BYTE) {
+        msg_buf[MSG_BCC2_IDX(data_size)] = SHORT_MSB(stuffedBcc2);
+        msg_buf[MSG_BCC2_IDX(data_size)+1] = SHORT_LSB(stuffedBcc2);
+        msg_buf[MSG_INFO_FLAG_END_IDX(data_size)+1] = MSG_FLAG;
+    } else {
+        msg_buf[MSG_BCC2_IDX(data_size)] = SHORT_LSB(stuffedBcc2);
+        msg_buf[MSG_INFO_FLAG_END_IDX(data_size)] = MSG_FLAG;
+    }
 
     int ret = write(fd, msg_buf, MSG_INFO_MSG_SIZE(data_size));
     free(msg_buf);
