@@ -10,22 +10,19 @@
 #include <strings.h>
 
 #include "ll.h"
+#include "message_defines.h" //TODO: REMOVE
 
 #define BAUDRATE B38400
 #define SERIAL_PORT "/dev/ttyS0"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
 int main(int argc, char **argv) {
+    
     //1 = emitter, 0 = receiver
     if (argc != 2) {
         printf("Usage: %s <isEmitter?>\n", argv[0]);
         exit(1);
     }
-
-    /*
-    Open serial port device for reading and writing and not as controlling tty
-    because we don't want to get killed if linenoise sends CTRL-C.
-  */
 
     int serial_port_fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY);
     if (serial_port_fd < 0) {
