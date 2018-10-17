@@ -184,7 +184,7 @@ static void handleFinalFlagRcv() {
 
     // Then, calculate the bcc2 of the unstuffed message
     // (Subtracting 1 to not count bcc2 in the bcc2 calculation)
-    byte calculated_bcc2 = calcBcc2(state_machine.unstuffed_msg, state_machine.unstuffed_msg_size - 1);
+    byte calculated_bcc2 = calcBcc2(state_machine.unstuffed_msg, state_machine.unstuffed_msg_size - 1, 0);
 
     // Finally, compare the calculated bcc2 to the final byte of the unstuffed message (received bcc2)
     byte received_bcc2 = state_machine.unstuffed_msg[state_machine.unstuffed_msg_size - 1];
