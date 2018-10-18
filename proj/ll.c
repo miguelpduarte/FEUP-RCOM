@@ -23,7 +23,7 @@ int llopen(int fd, byte role) {
             if(ret != MSG_SUPERVISION_MSG_SIZE || getMsgCtrl() != MSG_CTRL_UA) {
                 continue;
             } else {
-                return MSG_IDENTIFIER;
+                return COMMUNICATION_IDENTIFIER;
             }
         }
 
@@ -47,7 +47,7 @@ int llopen(int fd, byte role) {
         return INVALID_COMMUNICATION_ROLE;
     }
 
-    return 1;
+    return COMMUNICATION_IDENTIFIER;
 }
 
 int llwrite(int fd, byte* buffer, const size_t length) {
@@ -101,7 +101,7 @@ static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_
 
     } while(current_attempt < MSG_NUM_RESEND_TRIES);
 
-    return 1;    
+    return WRITE_AND_RETRY_FAILURE;    
 }
 
 int llread(int fd, dyn_buffer_st * dyn_buffer) {
@@ -143,14 +143,14 @@ int llclose(int fd) {
 
     if(num_tries == MSG_NUM_READ_TRIES) {
         fprintf(stderr, "llclose failed, max nr of retries reached!\n");
-        return -1;
+        return LLCLOSE_DISC_FAILED;
     }
 
     //Reply with UA
     ret = writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_UA);
     if(ret != 0) {
         fprintf(stderr, "llclose failed, could not send UA!\n");
-        return -2;
+        return LLCLOSE_UA_FAILED;
     }
 
     return 0;

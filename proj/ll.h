@@ -14,9 +14,12 @@
 #define INVALID_COMMUNICATION_ROLE          -2
 #define ESTABLISH_DATA_CONNECTION_FAILED    -3
 #define LLWRITE_FAILED                      -4
+#define WRITE_AND_RETRY_FAILURE             -5
+#define LLCLOSE_DISC_FAILED                 -6
+#define LLCLOSE_UA_FAILED                   -7
 
 //Successes
-#define MSG_IDENTIFIER                      1
+#define COMMUNICATION_IDENTIFIER             1
 
 /**
  * @brief   opens data connection

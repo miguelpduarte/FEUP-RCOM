@@ -149,5 +149,5 @@ int writeSupWithRetry(int fd, byte addr, byte ctrl) {
         }
     }
 
-    return -1;
+    return WRITE_SUP_MSG_FAILED;
 }
