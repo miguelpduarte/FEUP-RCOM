@@ -5,7 +5,7 @@
 
 #include "ll.h"
 
-int main(int argc, char * argv[]) {
+int main(int argc, char * argv[]) {    
     //1 = emitter, 0 = receiver
     if (argc != 2) {
         printf("Usage: %s <isEmitter?>\n", argv[0]);
