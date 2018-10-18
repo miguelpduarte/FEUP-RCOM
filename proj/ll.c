@@ -8,7 +8,6 @@
 #include "state.h"
 
 static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size);
-static int writeSupWithRetry(int fd, byte addr, byte ctrl);
 
 int llopen(int fd, byte role) {
     if (role == EMITTER) {
@@ -110,6 +109,17 @@ int llread(int fd, dyn_buffer_st * dyn_buffer) {
     //generic reading until
     //gets disc, replies with disc and waits for ua, then terminates
 
+    //Exits when it receives a DISC
+    int ret;
+    ret = receiverRead(fd, dyn_buffer);
+    if(ret != 0) {
+        fprintf(stderr, "Receiver: Timed out in reading!\n");
+    }
+
+    ret = writeSupWithRetry(fd, MSG_ADDR_REC, MSG_CTRL_DISC);
+    //TODO: read_UA(); -> Reads sup until it is an UA, if timed out then the program simply exits
+
+
     return -1;
 }
 
@@ -144,21 +154,4 @@ int llclose(int fd) {
     }
 
     return 0;
-}
-
-static int writeSupWithRetry(int fd, byte addr, byte ctrl) {
-    int num_tries, ret;
-    for (num_tries = 0; num_tries < MSG_NUM_RESEND_TRIES; num_tries++) {
-        ret = writeSupervisionMessage(fd, addr, ctrl);
-
-        // If the whole message could not be written, retry to write it
-        if (ret != MSG_SUPERVISION_MSG_SIZE && num_tries < MSG_NUM_RESEND_TRIES - 1) {
-            sleep(MSG_RESEND_DELAY);
-            continue;
-        } else {
-            return 0;
-        }
-    }
-
-    return -1;
 }

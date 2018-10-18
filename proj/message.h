@@ -3,12 +3,17 @@
 
 #include "utils.h"
 #include <stdlib.h>
+#include "dyn_buffer.h"
 
 typedef struct {
     byte addr;
     byte msg_nr;
     byte bcc2;
 } info_message_details_t;
+
+///ERRORS
+#define RECEIVER_READ_TIMEOUT       -1
+#define RECEIVER_READ_DISC           0
 
 /**
  *  @brief  writes a supervision message to the data connection
@@ -37,5 +42,9 @@ int writeInfoMessage(int fd, const info_message_details_t info_message_details, 
 int readSupervisionMessage(int fd);
 
 byte readInfoMsgResponse(int fd, byte msg_nr_S);
+
+int receiverRead(int fd, dyn_buffer_st * dyn_buffer);
+
+int writeSupWithRetry(int fd, byte addr, byte ctrl);
 
 #endif /* _MESSAGE_ */

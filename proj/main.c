@@ -50,9 +50,21 @@ int main(int argc, char * argv[]) {
             printf("receiver: llopen() successful: %d.\n", ll_ret);
         }
 
-        dyn_buffer_st dyn_buffer;
+        dyn_buffer_st * dyn_buffer = createBuffer();
+        if(dyn_buffer == NULL) {
+            fprintf(stderr, "Allocation of dynamic buffer failed\n");
+            exit(-4);
+        }
 
-        llread(serial_port_fd, &dyn_buffer);
+        llread(serial_port_fd, dyn_buffer);
+
+        printf("Received the following message:\n");
+        int i;
+        for(i = 0; i < dyn_buffer->length; ++i) {
+            printf("%c", dyn_buffer->buf[i]);
+        }
+
+        deleteBuffer(&dyn_buffer);
     }
 
     // TODO: What to do about this sleep?

@@ -4,6 +4,7 @@
 #include "state.h"
 #include <unistd.h>
 #include <stdlib.h>
+#include "dyn_buffer.h"
 
 int writeSupervisionMessage(int fd, byte msg_addr, byte msg_ctrl) {
     byte msg_buf[MSG_SUPERVISION_MSG_SIZE];
@@ -83,4 +84,70 @@ int readSupervisionMessage(int fd) {
     }
 
     return MSG_SUPERVISION_MSG_SIZE;
+}
+
+int receiverRead(int fd, dyn_buffer_st * dyn_buffer) {
+    resetMsgState();
+    byte msg_byte;
+    ssize_t ret;
+    int time_out_counter = 0;
+    size_t read_buf_size, msg_nr = 0;
+    byte * read_buf;
+
+    while(1) {
+        ret = read(fd, &msg_byte, 1);
+
+        if (ret <= 0) {
+            if(time_out_counter < MSG_NUM_READ_TRIES) {
+                time_out_counter++;
+                continue;
+            } else {
+                return RECEIVER_READ_TIMEOUT;
+            }
+        } else {
+            time_out_counter = 0;
+        }
+
+        handleMsgByte(msg_byte);
+
+        if (getState() == SUP_MSG_RECEIVED) {
+            if (getMsgCtrl() == MSG_CTRL_DISC) {
+                return RECEIVER_READ_DISC;
+            }
+        } else if (getState() == INFO_MSG_RECEIVED) {
+            read_buf = getInfoMsgBuffer(&read_buf_size);
+
+            concatBuffer(dyn_buffer, read_buf, read_buf_size);
+
+            resetMsgState();
+
+            // ready to receive next message
+            msg_nr++;
+            writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_RR(msg_nr % 2));
+        } else if (getState() == MSG_ERROR) {
+            resetMsgState();
+
+            // ask for message resend
+            writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_REJ(msg_nr % 2));
+        }
+    }
+
+    return RECEIVER_READ_DISC;
+}
+
+int writeSupWithRetry(int fd, byte addr, byte ctrl) {
+    int num_tries, ret;
+    for (num_tries = 0; num_tries < MSG_NUM_RESEND_TRIES; num_tries++) {
+        ret = writeSupervisionMessage(fd, addr, ctrl);
+
+        // If the whole message could not be written, retry to write it
+        if (ret != MSG_SUPERVISION_MSG_SIZE && num_tries < MSG_NUM_RESEND_TRIES - 1) {
+            sleep(MSG_RESEND_DELAY);
+            continue;
+        } else {
+            return 0;
+        }
+    }
+
+    return -1;
 }
