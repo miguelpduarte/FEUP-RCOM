@@ -1,7 +1,7 @@
 #include "state.h"
 #include "utils.h"
 
-static void setState(state_st new_state);
+static void setState(state_t new_state);
 
 static void handleWaitingFlag(byte msg_byte);
 static void handleFlagReceived(byte msg_byte);
@@ -21,7 +21,7 @@ byte * getInfoMsgBuffer(size_t * msg_size) {
     return state_machine.unstuffed_msg;
 }
 
-state_st getState() {
+state_t getState() {
     return state_machine.current_state;
 }
 
@@ -34,7 +34,7 @@ void resetMsgState() {
     state_machine.msg_index = 0;
 }
 
-static void setState(state_st new_state) {
+static void setState(state_t new_state) {
     state_machine.current_state = new_state;
 }
 

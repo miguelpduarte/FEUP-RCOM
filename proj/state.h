@@ -19,11 +19,11 @@ typedef enum {
     
     MSG_ERROR,          /** Info Message type - Message error, send respective REJ */
     INFO_MSG_RECEIVED   /** Info Message type - Message received successfully */
-} state_st;
+} state_t;
 
 /** State Machine structure */
 typedef struct {
-    state_st current_state;                     /** Current machine state */
+    state_t current_state;                     /** Current machine state */
     byte addr;                                  /** Message address */
     byte ctrl;                                  /** Message control octet */
     size_t msg_index;                           /** Info message buffer current index (size in bytes) */
@@ -36,7 +36,7 @@ typedef struct {
  * @brief   retrieves the state machine current state
  * @return  state machine current state
  */
-state_st getState();
+state_t getState();
 
 /**
  * @brief   retrieves the state machine message control octet
@@ -47,7 +47,6 @@ byte getMsgCtrl();
 /**
  * @brief   passes a byte to the state machine, triggering (or not) state changes
  * @param   msg_byte    byte to be handled by the state machine
- * @return  none
  */
 void handleMsgByte(byte msg_byte);
 
@@ -60,7 +59,6 @@ byte * getInfoMsgBuffer(size_t * msg_size);
 
 /**
  * @brief   resets the state machine
- * @return  none
  */
 void resetMsgState();
 

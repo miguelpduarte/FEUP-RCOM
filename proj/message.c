@@ -54,22 +54,22 @@ byte readInfoMsgResponse(int fd, byte msg_nr_S) {
     //if rej or cant read return msg_nr_S again
     //else, porque rr retorna o que vier no rr
     // - no need to worry with checking if its the same, that's in the above layer
-    byte response[MSG_SUPERVISION_MSG_SIZE];
-    int ret = readSupervisionMessage(fd, response);
+    int ret = readSupervisionMessage(fd);
 
     if (ret != MSG_SUPERVISION_MSG_SIZE) {
         // Response got lost
         return msg_nr_S;
     } else {
-        if (response[MSG_CTRL_IDX] == MSG_CTRL_RR_0 || response[MSG_CTRL_IDX] == MSG_CTRL_RR_1) {
-            return MSG_CTRL_RR_DECODE(response[MSG_CTRL_IDX]);
+        if (getMsgCtrl() == MSG_CTRL_RR_0 || getMsgCtrl() == MSG_CTRL_RR_1) {
+            return MSG_CTRL_RR_DECODE(getMsgCtrl());
         } else {
             return msg_nr_S;
         }
     }
 }
 
-int readSupervisionMessage(int fd, byte* buffer) {
+int readSupervisionMessage(int fd) {
+    resetMsgState();
     byte msg_byte;
     ssize_t ret;
     while(getState() != SUP_MSG_RECEIVED) {
@@ -78,9 +78,6 @@ int readSupervisionMessage(int fd, byte* buffer) {
         if (ret <= 0) {
             return ret;
         }
-
-        // read the correct byte according to the current state
-        buffer[getState()] = msg_byte;
 
         handleMsgByte(msg_byte); 
     }

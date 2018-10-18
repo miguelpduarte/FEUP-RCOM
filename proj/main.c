@@ -1,82 +1,63 @@
-/*Non-Canonical Input Processing*/
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <strings.h>
+#include "config.h"
+#include "dyn_buffer.h"
 
 #include "ll.h"
-#include "message_defines.h" //TODO: REMOVE
 
-#define BAUDRATE B38400
-#define SERIAL_PORT "/dev/ttyS0"
-#define _POSIX_SOURCE 1 /* POSIX compliant source */
-
-int main(int argc, char **argv) {
-    
+int main(int argc, char * argv[]) {
     //1 = emitter, 0 = receiver
     if (argc != 2) {
         printf("Usage: %s <isEmitter?>\n", argv[0]);
         exit(1);
     }
 
-    int serial_port_fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY);
-    if (serial_port_fd < 0) {
-        perror(SERIAL_PORT);
-        exit(-1);
-    }
+    set_config();
 
-    struct termios old_termio, new_termio;
+    int serial_port_fd = get_serial_port_fd();
 
-    if (tcgetattr(serial_port_fd, &old_termio) == -1) {
-        // save current port settings
-        perror("tcgetattr");
-        exit(-1);
-    }
+    int isEmitter = atoi(argv[1]);
 
-    bzero(&new_termio, sizeof(new_termio));
-    new_termio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
-    new_termio.c_iflag = IGNPAR;
-    new_termio.c_oflag = 0;
+    int ll_ret;
 
-    // set input mode (non-canonical, no echo,...)
-    new_termio.c_lflag = 0;
+    if(isEmitter == EMITTER) {
+        ll_ret = llopen(serial_port_fd, EMITTER);
 
-    new_termio.c_cc[VTIME] = MSG_WAIT_TIME;
-    new_termio.c_cc[VMIN] = MSG_MIN_CHARS;
+        if (ll_ret < 0) {
+            fprintf(stderr, "emitter: llopen() function failed\n");
+            exit(-3);
+        } else {
+            printf("emitter: llopen() successful: %d.\n", ll_ret);
+        }
 
-    tcflush(serial_port_fd, TCIOFLUSH);
+        const int sending_buf_size = 1097;
+        byte sending_buf[sending_buf_size];
 
-    if (tcsetattr(serial_port_fd, TCSANOW, &new_termio) == -1) {
-        perror("tcsetattr");
-        exit(-2);
-    }
+        int i;
+        for(i = 0; i < sending_buf_size; ++i) {
+            sending_buf[i] = (i % 10);
+        }
 
-    int isEmitter = atoi(argv[1]);   
-
-    // int spaghet = llwrite(serial_port_fd, NULL, banana);
-
-    int ret = llopen(serial_port_fd, isEmitter == EMITTER);
-
-    if (ret < 0) {
-        fprintf(stderr, "llopen() function failed\n");
-        exit(-3);
+        llwrite(serial_port_fd, sending_buf, sending_buf_size);
+        llclose(serial_port_fd);
     } else {
-        printf("llopen() successful: %d.\n", ret);
+        ll_ret = llopen(serial_port_fd, RECEIVER);
+
+        if (ll_ret < 0) {
+            fprintf(stderr, "receiver: llopen() function failed\n");
+            exit(-3);
+        } else {
+            printf("receiver: llopen() successful: %d.\n", ll_ret);
+        }
+
+        dyn_buffer_st dyn_buffer;
+
+        llread(serial_port_fd, &dyn_buffer);
     }
 
-    sleep(2);
-
-    if (tcsetattr(serial_port_fd, TCSANOW, &old_termio) == -1) {
-        perror("tcsetattr reset");
-        exit(-4);
-    }
-
-    close(serial_port_fd);
+    // TODO: What to do about this sleep?
+    sleep(2);   
+    reset_config();
 
     return 0;    
 }

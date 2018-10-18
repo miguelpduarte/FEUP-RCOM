@@ -1,33 +1,30 @@
 #include "ll.h"
 #include "message.h"
 #include "message_defines.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include "utils.h"
+#include "state.h"
 
-static int writeAndRetry(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size);
+static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size);
+static int writeSupWithRetry(int fd, byte addr, byte ctrl);
 
 int llopen(int fd, byte role) {
-    byte buf[MSG_SUPERVISION_MSG_SIZE];
-
     if (role == EMITTER) {
+
         int num_tries, ret;
         for (num_tries = 0; num_tries < MSG_NUM_READ_TRIES; num_tries++) {
-            ret = writeSupervisionMessage(fd, MSG_ADDR_EMT, MSG_CTRL_SET);
-
-            // If the whole message could not be written, retry to write it
-            if (ret != MSG_SUPERVISION_MSG_SIZE) {
+            ret = writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_SET);
+            if(ret != 0) {
                 continue;
             }
 
-            // Wait for receiver acknowledgement
-            ret = readSupervisionMessage(fd, buf);
-
-            // Verify correct receiver message type
-            if (ret != MSG_SUPERVISION_MSG_SIZE || buf[MSG_CTRL_IDX] != MSG_CTRL_UA) {
+            ret = readSupervisionMessage(fd);
+            if(ret != MSG_SUPERVISION_MSG_SIZE || getMsgCtrl() != MSG_CTRL_UA) {
                 continue;
             } else {
-                return 1;
+                return MSG_IDENTIFIER;
             }
         }
 
@@ -36,15 +33,15 @@ int llopen(int fd, byte role) {
         // Wait until transmitter tries to start communication
         int ret;
         do {
-            ret = readSupervisionMessage(fd, buf);
+            ret = readSupervisionMessage(fd);
 
             if (ret != MSG_SUPERVISION_MSG_SIZE) {
                 continue;
             }
-        } while (buf[MSG_CTRL_IDX] != MSG_CTRL_SET);
+        } while (getMsgCtrl() != MSG_CTRL_SET);
 
-        ret = writeSupervisionMessage(fd, MSG_ADDR_REC, MSG_CTRL_UA);
-        if (ret != MSG_SUPERVISION_MSG_SIZE) {
+        ret = writeSupWithRetry(fd, MSG_ADDR_REC, MSG_CTRL_UA);
+        if (ret != 0) {
             return WRITE_SUPERVISION_MSG_FAILED;
         }        
     } else {
@@ -72,7 +69,7 @@ int llwrite(int fd, byte* buffer, const size_t length) {
         num_bytes_written += ds.data_bytes_stuffed;
 
         //Write message and proceed accordingly to return
-        if(writeAndRetry(fd, msg_details, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
+        if(writeAndRetryInfoMsg(fd, msg_details, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
             return LLWRITE_FAILED;
         }
 
@@ -83,7 +80,7 @@ int llwrite(int fd, byte* buffer, const size_t length) {
     return 0;
 }
 
-static int writeAndRetry(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size) {
+static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size) {
     int current_attempt = 0;
     int response = 0, num_bytes_written;
     const byte msg_nr_S = MSG_CTRL_S(info_message_details.msg_nr);
@@ -106,4 +103,62 @@ static int writeAndRetry(const int fd, const info_message_details_t info_message
     } while(current_attempt < MSG_NUM_RESEND_TRIES);
 
     return 1;    
+}
+
+int llread(int fd, dyn_buffer_st * dyn_buffer) {
+
+    //generic reading until
+    //gets disc, replies with disc and waits for ua, then terminates
+
+    return -1;
+}
+
+int llclose(int fd) {
+    //Send DISC
+    int num_tries, ret;
+    for (num_tries = 0; num_tries < MSG_NUM_READ_TRIES; num_tries++) {
+        ret = writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_DISC);
+        if(ret != 0) {
+            continue;
+        }
+
+        //(Wait for DISC)
+        ret = readSupervisionMessage(fd);
+        if(ret != MSG_SUPERVISION_MSG_SIZE || getMsgCtrl() != MSG_CTRL_DISC) {
+            continue;
+        } else {
+            break;
+        }
+    }
+
+    if(num_tries == MSG_NUM_READ_TRIES) {
+        fprintf(stderr, "llclose failed, max nr of retries reached!\n");
+        return -1;
+    }
+
+    //Reply with UA
+    ret = writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_UA);
+    if(ret != 0) {
+        fprintf(stderr, "llclose failed, could not send UA!\n");
+        return -2;
+    }
+
+    return 0;
+}
+
+static int writeSupWithRetry(int fd, byte addr, byte ctrl) {
+    int num_tries, ret;
+    for (num_tries = 0; num_tries < MSG_NUM_RESEND_TRIES; num_tries++) {
+        ret = writeSupervisionMessage(fd, addr, ctrl);
+
+        // If the whole message could not be written, retry to write it
+        if (ret != MSG_SUPERVISION_MSG_SIZE && num_tries < MSG_NUM_RESEND_TRIES - 1) {
+            sleep(MSG_RESEND_DELAY);
+            continue;
+        } else {
+            return 0;
+        }
+    }
+
+    return -1;
 }
