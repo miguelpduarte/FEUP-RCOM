@@ -17,6 +17,7 @@
 #define WRITE_AND_RETRY_FAILURE             -5
 #define LLCLOSE_DISC_FAILED                 -6
 #define LLCLOSE_UA_FAILED                   -7
+#define LLREAD_FAILED_CLOSE_COMMUNICATION   -8
 
 //Successes
 #define COMMUNICATION_IDENTIFIER             1
@@ -50,7 +51,7 @@ int llwrite(int fd, byte* buffer, const size_t length);
  * @brief   reads a message from the data connection
  * @param   fd      data connection file descriptor
  * @param   buffer  read buffer message
- * @return  number of read bytes, negative number on failure
+ * @return  return 0 on success, LLREAD failed otherwise
 */
 int llread(int fd, dyn_buffer_st * dyn_buffer);
 

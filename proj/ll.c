@@ -105,22 +105,34 @@ static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_
 }
 
 int llread(int fd, dyn_buffer_st * dyn_buffer) {
-
-    //generic reading until
-    //gets disc, replies with disc and waits for ua, then terminates
+    int num_tries, ret;
 
     //Exits when it receives a DISC
-    int ret;
     ret = receiverRead(fd, dyn_buffer);
-    if(ret != 0) {
+    if(ret != RECEIVER_READ_DISC) {
         fprintf(stderr, "Receiver: Timed out in reading!\n");
+        return RECEIVER_READ_TIMEOUT;
     }
 
     ret = writeSupWithRetry(fd, MSG_ADDR_REC, MSG_CTRL_DISC);
-    //TODO: read_UA(); -> Reads sup until it is an UA, if timed out then the program simply exits
 
+    for (num_tries = 0; num_tries < MSG_NUM_READ_TRIES; num_tries++) {
+        // Reply with DISC, confirming connection ending
+        ret = writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_DISC);
+        if(ret != 0) {
+            continue;
+        }
 
-    return -1;
+        // Waits for Emitter connection ending, UA
+        ret = readSupervisionMessage(fd);
+        if(ret != MSG_SUPERVISION_MSG_SIZE || getMsgCtrl() != MSG_CTRL_UA) {
+            continue;
+        } else {
+            return 0;
+        }
+    }
+
+    return LLREAD_FAILED_CLOSE_COMMUNICATION;
 }
 
 int llclose(int fd) {
