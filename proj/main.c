@@ -11,7 +11,7 @@
 int main(int argc, char * argv[]) {   
     //1 = emitter, 0 = receiver
     if (argc != 2) {
-        printf("Usage: %s <isEmitter?>\n", argv[0]);
+        printf("Usage: %s <isReceiver?>\n", argv[0]);
         exit(1);
     }
 
