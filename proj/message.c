@@ -47,7 +47,10 @@ int writeInfoMessage(int fd, const info_message_details_t info_message_details, 
 
     int ret = write(fd, msg_buf, MSG_INFO_MSG_SIZE(data_size));
     free(msg_buf);
-    return ret;
+    
+    //TODO: Document
+    //Returns 0 if success - the full buffer was written
+    return ret != MSG_INFO_MSG_SIZE(data_size);
 }
 
 byte readInfoMsgResponse(int fd, byte msg_nr_S) {

@@ -25,7 +25,7 @@
 #define MSG_CTRL_RR(r)          0x05 | (r ? BIT(7) : 0x00)  /* Receiver Ready (positive ACK) */
 #define MSG_CTRL_RR_0           0x05
 #define MSG_CTRL_RR_1           0x85
-#define MSG_CTRL_RR_DECODE(b)   ((b) >> 7);
+#define MSG_CTRL_RR_DECODE(b)   ((b) >> 7)
 #define MSG_CTRL_REJ(r)         0x01 | (r ? BIT(7) : 0x00)  /* Reject (negative ACK) */
 #define MSG_CTRL_REJ_0          0x01
 #define MSG_CTRL_REJ_1          0x81
