@@ -116,7 +116,7 @@ int llread(int fd, dyn_buffer_st * dyn_buffer) {
 
     for (num_tries = 0; num_tries < MSG_NUM_READ_TRIES; num_tries++) {
         // Reply with DISC, confirming connection ending
-        ret = writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_DISC);
+        ret = writeSupWithRetry(fd, MSG_ADDR_REC, MSG_CTRL_DISC);
         if(ret != 0) {
             continue;
         }

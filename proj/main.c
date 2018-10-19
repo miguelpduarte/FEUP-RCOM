@@ -1,58 +1,14 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+
 #include "config.h"
 #include "dyn_buffer.h"
 #include "utils.h"
-
 #include "ll.h"
+#include "file_reader.h"
 
-#define BUF_LEN 20
-
-int readFile(dyn_buffer_st* db) {
-	int fd = open("lorem.txt" , O_RDONLY);
-	if (fd < 0) {
-		fprintf(stderr, "File not found.\n");
-		return -1;
-    }
-
-	// Perform the "copying" itself
-	unsigned char buffer[BUF_LEN];
-	size_t num_chars;
-	while ( (num_chars = read(fd, buffer, BUF_LEN)) > 0){
-        if (num_chars < 0) {
-            fprintf(stderr, "Error reading file.\n");
-            return -2;
-        }
-        
-		concatBuffer(db, buffer, num_chars);
-	}
-
-    return 0;
-}
-
-void testFileToDynBuffer() {
-    printf("Running testFileToDynBuffer.\n\n");
-
-    dyn_buffer_st* db = createBuffer();
-
-    readFile(db);
-
-    int i;
-    for (i=0 ; i<db->length ; i++) {
-        printf("%c", db->buf[i]);
-    }
-    
-    printf("\n\nDone.\n");
-
-    exit(0); 
-}
 
 int main(int argc, char * argv[]) {   
-    testFileToDynBuffer();
-
     //1 = emitter, 0 = receiver
     if (argc != 2) {
         printf("Usage: %s <isEmitter?>\n", argv[0]);
@@ -77,16 +33,16 @@ int main(int argc, char * argv[]) {
             printf("emitter: llopen() successful: %d.\n", ll_ret);
         }
 
-        const int sending_buf_size = 1097;
-        byte sending_buf[sending_buf_size];
-
-        int i;
-        for(i = 0; i < sending_buf_size; ++i) {
-            sending_buf[i] = (i % 10);
+        dyn_buffer_st* db = createBuffer();
+        if(readFile(db) != 0) {
+            fprintf(stderr, "Error in reading from file!\n");
+            exit(-4);
         }
 
-        llwrite(serial_port_fd, sending_buf, sending_buf_size);
+        llwrite(serial_port_fd, db->buf, db->length);
         llclose(serial_port_fd);
+
+        deleteBuffer(&db);
     } else {
         ll_ret = llopen(serial_port_fd, RECEIVER);
 
@@ -105,7 +61,7 @@ int main(int argc, char * argv[]) {
 
         llread(serial_port_fd, dyn_buffer);
 
-        printf("Received the following message:\n");
+        printf("Received the following message:\n\n");
         int i;
         for(i = 0; i < dyn_buffer->length; ++i) {
             printf("%c", dyn_buffer->buf[i]);
