@@ -4,6 +4,7 @@
 #include "state.h"
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include "dyn_buffer.h"
 
 int writeSupervisionMessage(int fd, byte msg_addr, byte msg_ctrl) {
@@ -29,10 +30,8 @@ int writeInfoMessage(int fd, const info_message_details_t info_message_details, 
     msg_buf[MSG_ADDR_IDX] = info_message_details.addr;
     msg_buf[MSG_CTRL_IDX] = MSG_CTRL_S(info_message_details.msg_nr);
     msg_buf[MSG_BCC1_IDX] = MSG_BCC1(info_message_details.addr, MSG_CTRL_S(info_message_details.msg_nr));
-    
-    for(size_t i = 0; i < data_size; ++i) {
-        msg_buf[MSG_DATA_BASE_IDX + i] = data[i];
-    }
+
+    memcpy(msg_buf + MSG_DATA_BASE_IDX, data, data_size);
 
     unsigned short stuffedBcc2 = stuffByte(info_message_details.bcc2);
 
