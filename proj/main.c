@@ -8,7 +8,7 @@
 #include "file_handler.h"
 
 #define INPUT_FILE "pinguim.gif"
-#define OUTPUT_FILE "output.cenas"
+#define OUTPUT_FILE "output.gif"
 
 int main(int argc, char * argv[]) {
     //1 = emitter, 0 = receiver

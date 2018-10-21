@@ -104,7 +104,6 @@ int receiverRead(int fd, dyn_buffer_st * dyn_buffer) {
                 //Timed out in reading, resetting mesage state for safety 
                 // and sending an RR for the same message
                 resetMsgState();
-                writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_RR(msg_nr));
                 time_out_counter++;
                 continue;
             } else {
