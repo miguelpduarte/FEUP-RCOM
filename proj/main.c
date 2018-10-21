@@ -7,6 +7,9 @@
 #include "ll.h"
 #include "file_handler.h"
 
+#define INPUT_FILE "nrs.txt"
+#define OUTPUT_FILE "output.cenas"
+
 int main(int argc, char * argv[]) {
     //1 = emitter, 0 = receiver
     if (argc != 2) {
@@ -33,7 +36,7 @@ int main(int argc, char * argv[]) {
         }
 
         dyn_buffer_st* db = createBuffer();
-        if(readFile("pinguim.gif", db) != 0) {
+        if(readFile(INPUT_FILE, db) != 0) {
             fprintf(stderr, "Error in reading from file!\n");
             exit(-4);
         }
@@ -61,7 +64,7 @@ int main(int argc, char * argv[]) {
         llread(serial_port_fd, dyn_buffer);
 
         printf("Received message\n");
-        writeFile("pinguim_recebido.gif", dyn_buffer);
+        writeFile(OUTPUT_FILE, dyn_buffer);
 
         deleteBuffer(&dyn_buffer);
     }

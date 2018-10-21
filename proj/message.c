@@ -101,6 +101,10 @@ int receiverRead(int fd, dyn_buffer_st * dyn_buffer) {
 
         if (ret <= 0) {
             if(time_out_counter < MSG_NUM_READ_TRIES) {
+                //Timed out in reading, resetting mesage state for safety 
+                // and sending an RR for the same message
+                resetMsgState();
+                writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_RR(msg_nr));
                 time_out_counter++;
                 continue;
             } else {
@@ -117,20 +121,25 @@ int receiverRead(int fd, dyn_buffer_st * dyn_buffer) {
                 return RECEIVER_READ_DISC;
             }
         } else if (getState() == INFO_MSG_RECEIVED) {
-            read_buf = getInfoMsgBuffer(&read_buf_size);
+            if(getMsgCtrl() == MSG_CTRL_S(msg_nr)) {
+                //Received the message we were expecting
+                read_buf = getInfoMsgBuffer(&read_buf_size);
 
-            concatBuffer(dyn_buffer, read_buf, read_buf_size);
+                concatBuffer(dyn_buffer, read_buf, read_buf_size);
+
+                // ready to receive next message
+                msg_nr++;
+            }
 
             resetMsgState();
+            //Writing the correct RR ()
+            writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_RR(msg_nr));
 
-            // ready to receive next message
-            msg_nr++;
-            writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_RR(msg_nr % 2));
         } else if (getState() == MSG_ERROR) {
             resetMsgState();
 
             // ask for message resend
-            writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_REJ(msg_nr % 2));
+            writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_REJ(msg_nr));
         }
     }
 

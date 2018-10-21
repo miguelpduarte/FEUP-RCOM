@@ -66,6 +66,8 @@ int llwrite(int fd, byte* buffer, const size_t length) {
         //Updating current "index" in data buffer
         num_bytes_written += ds.data_bytes_stuffed;
 
+        printf("Sending chunk number %d\n", msg_details.msg_nr);
+
         //Write message and proceed accordingly to return
         if(writeAndRetryInfoMsg(fd, msg_details, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
             return LLWRITE_FAILED;
@@ -85,16 +87,20 @@ static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_
 
     do {
         current_attempt++;
+        printf("\tAttempt number: %d\n", current_attempt);
 
         num_bytes_written = writeInfoMessage(fd, info_message_details, stuffed_data, stuffed_data_size);
         if(num_bytes_written != 0) {
+            printf("\tFailed to write full chunk\n");
             continue;
         }
 
         response = readInfoMsgResponse(fd, msg_nr_S);
         if(response == msg_nr_S) {
+            printf("\tReceived request mismatch, resending same message\n");
             continue;
         } else {
+            printf("\tDas gut, onto the next 1\n");
             return 0;
         }
 
