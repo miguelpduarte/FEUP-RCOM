@@ -5,10 +5,9 @@
 #include "dyn_buffer.h"
 #include "utils.h"
 #include "ll.h"
-#include "file_reader.h"
+#include "file_handler.h"
 
-
-int main(int argc, char * argv[]) {   
+int main(int argc, char * argv[]) {
     //1 = emitter, 0 = receiver
     if (argc != 2) {
         printf("Usage: %s <isReceiver?>\n", argv[0]);
@@ -34,7 +33,7 @@ int main(int argc, char * argv[]) {
         }
 
         dyn_buffer_st* db = createBuffer();
-        if(readFile(db) != 0) {
+        if(readFile("pinguim.gif", db) != 0) {
             fprintf(stderr, "Error in reading from file!\n");
             exit(-4);
         }
@@ -61,11 +60,8 @@ int main(int argc, char * argv[]) {
 
         llread(serial_port_fd, dyn_buffer);
 
-        printf("Received the following message:\n\n");
-        int i;
-        for(i = 0; i < dyn_buffer->length; ++i) {
-            printf("%c", dyn_buffer->buf[i]);
-        }
+        printf("Received message\n");
+        writeFile("pinguim_recebido.gif", dyn_buffer);
 
         deleteBuffer(&dyn_buffer);
     }
@@ -74,5 +70,5 @@ int main(int argc, char * argv[]) {
     sleep(2);   
     reset_config();
 
-    return 0;    
+    return 0;
 }
