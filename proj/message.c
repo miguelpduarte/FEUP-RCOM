@@ -76,6 +76,11 @@ int readSupervisionMessage(int fd) {
     byte msg_byte;
     ssize_t ret;
     while(getState() != SUP_MSG_RECEIVED) {
+        // Ensure the message received is a supervision message
+        if (getState() == INFO_MSG_RECEIVED || getState() == MSG_ERROR) {
+            resetMsgState();
+        }
+
         ret = read(fd, &msg_byte, 1);
 
         if (ret <= 0) {
