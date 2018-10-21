@@ -38,7 +38,7 @@ data_stuffing_t stuffData(byte * data, const size_t data_size, const size_t data
     return ds;
 }
 
-size_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer) {
+ssize_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer) {
     size_t data_index = 0, unstuffed_buffer_index = 0;
 
     while(data_index < data_size) {
@@ -51,7 +51,8 @@ size_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer)
                 unstuffed_buffer[unstuffed_buffer_index++] = MSG_ESCAPE_BYTE;
             } else {
                 printf("Found invalid byte after escape byte! Unsure on how to proceed!\n");
-                exit(-1);
+                // Found invalid byte after escape byte, resetting
+                return -1;
             }
         } else {
             unstuffed_buffer[unstuffed_buffer_index++] = data[data_index];

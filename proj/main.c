@@ -7,7 +7,7 @@
 #include "ll.h"
 #include "file_handler.h"
 
-#define INPUT_FILE "nrs.txt"
+#define INPUT_FILE "pinguim.gif"
 #define OUTPUT_FILE "output.cenas"
 
 int main(int argc, char * argv[]) {
