@@ -99,6 +99,10 @@ static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_
         if(response == msg_nr_S) {
             printf("\tReceived request mismatch, resending same message\n");
             continue;
+        } else if(response == RECEIVED_REJ) {
+            printf("\tReceived REJ, resetting number of retries\n");
+            current_attempt = 0;
+            continue;
         } else {
             printf("\tDas gut, onto the next 1\n");
             return 0;

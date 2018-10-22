@@ -46,7 +46,7 @@ int readSupervisionMessage(int fd);
  * @brief   reads a response to an information message
  * @param   fd  data connection file descriptor
  * @param   msg_nr_S    message number funcion value, S(n)
- * @return  new message number S(n) based on response
+ * @return  new message number n of S(n) based on response or RECEIVED_REJ if a REJ is received
  */
 byte readInfoMsgResponse(int fd, byte msg_nr_S);
 

@@ -70,6 +70,7 @@
 
 //other
 #define DATA_SIZE_FROM_INFO_MSG_LENGTH(msg_length)      ((msg_length) - 6)
+#define RECEIVED_REJ                                  3
 
 
 #endif /* _MESSAGE_DEFINES_ */

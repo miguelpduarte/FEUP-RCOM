@@ -63,8 +63,12 @@ byte readInfoMsgResponse(int fd, byte msg_nr_S) {
         // Response got lost
         return msg_nr_S;
     } else {
-        if (getMsgCtrl() == MSG_CTRL_RR_0 || getMsgCtrl() == MSG_CTRL_RR_1) {
-            return MSG_CTRL_RR_DECODE(getMsgCtrl());
+        byte msg_ctrl = getMsgCtrl();
+
+        if (msg_ctrl == MSG_CTRL_RR_0 || msg_ctrl == MSG_CTRL_RR_1) {
+            return MSG_CTRL_RR_DECODE(msg_ctrl);
+        } else if (msg_ctrl == MSG_CTRL_REJ_0 || msg_ctrl == MSG_CTRL_REJ_1) {
+            return RECEIVED_REJ;
         } else {
             return msg_nr_S;
         }
