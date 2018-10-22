@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "ll.h"
 #include "file_handler.h"
+#include "application.h"
 
 #define INPUT_FILE "pinguim.gif"
 #define OUTPUT_FILE "output.gif"

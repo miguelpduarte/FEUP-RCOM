@@ -1,7 +1,7 @@
 #include "file_handler.h"
-#include <stdio.h>
 #include "dyn_buffer.h"
 #include "utils.h"
+#include <stdio.h>
 
 #define BUF_LEN 20
 

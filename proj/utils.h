@@ -5,10 +5,14 @@
 
 #define MIN(x,y)        (((x) < (y)) ? (x) : (y))
 #define MAX(x,y)        (((x) > (y)) ? (x) : (y))
-#define SHORT_LSB(x)    ( (x) & 0x00FF)
-#define SHORT_MSB(x)    (((x) & 0xFF00) >> 8)
+#define GET_SHORT_LSB(x)    ( (x) & 0x00FF)
+#define GET_SHORT_MSB(x)    (((x) & 0xFF00) >> 8)
+#define BYTE_TO_LSB(x)      ((x) && 0xFF)
+#define BYTE_TO_MSB(x)      (((x) && 0xFF) << 8)
+#define GET_N_BYTE_OF(x,n)  (((x) >> ((n)*8)) & 0xFF)
 
 typedef unsigned char byte;
+typedef unsigned int u_int;
 
 /** Structure regarding data stuffing information */
 typedef struct {
