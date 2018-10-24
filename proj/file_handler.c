@@ -23,6 +23,7 @@ int readFile(const char * file_name, dyn_buffer_st* db) {
 
 	if(feof(file_ptr) != 0) {
 		//EOF Ocurred
+		fclose(file_ptr);
 		return 0;
 	} else {
 		return -2;
@@ -50,5 +51,6 @@ int writeFile(const char * file_name, dyn_buffer_st * db) {
 		}
 	}
 
+	fclose(file_ptr);
 	return 0;
 }
