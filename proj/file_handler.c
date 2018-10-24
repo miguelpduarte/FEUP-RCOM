@@ -11,7 +11,7 @@ int readFile(const char * file_name, dyn_buffer_st* db) {
 	file_ptr = fopen(file_name, "rb");
 	if (file_ptr == NULL) {
 		fprintf(stderr, "File not found.\n");
-		return -1;
+		return FILE_NOT_FOUND;
     }
 
 	// Perform the "copying" itself
@@ -26,7 +26,7 @@ int readFile(const char * file_name, dyn_buffer_st* db) {
 		fclose(file_ptr);
 		return 0;
 	} else {
-		return -2;
+		return FILE_READ_FAILED;
 	}
 }
 
@@ -35,8 +35,8 @@ int writeFile(const char * file_name, dyn_buffer_st * db) {
 
 	file_ptr = fopen(file_name, "wb");
 	if (file_ptr == NULL) {
-		fprintf(stderr, "File not found.\n");
-		return -1;
+		fprintf(stderr, "File not found.\n");	// TODO: Shouldn't this create the file?
+		return FILE_NOT_FOUND;
     }
 
 	int i;
@@ -47,7 +47,7 @@ int writeFile(const char * file_name, dyn_buffer_st * db) {
 		num_written = fwrite(db->buf + i, sizeof(*(db->buf)), num_to_write, file_ptr);
 
 		if(num_written != num_to_write) {
-			return -1;
+			return FILE_WRITE_FAILED;
 		}
 	}
 

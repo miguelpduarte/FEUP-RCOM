@@ -35,15 +35,42 @@
 
 #define LLOPEN_FAILED           -1
 #define BUFFER_ALLOC_FAILED     -2
-#define FILE_READ_FAILED        -3
-#define PACKET_SENDING_FAILED   -4
+#define PACKET_SENDING_FAILED   -3
 
+/**
+ * @brief   writes a file to the serial port data connection
+ * @param   fd  data connection file descriptor
+ * @param   file_name   file name
+ * @return  0 on success, non-zero otherwise
+ */
 int sendFile(int fd, const char* file_name);
 
+/**
+ * @brief   writes a file to the serial port data connection
+ * @param   fd  data connection file descriptor
+ * @param   db   dynamic buffer reference
+ * @return  0 on success, non-zero otherwise
+ */
 int retrieveFile(dyn_buffer_st* db);
 
+/**
+ * @brief   sends a control packet to the serial port data connection
+ * @param   fd          data connection file descriptor
+ * @param   ctrl        packet control octet
+ * @param   file_name   file name
+ * @param   file_size   file size
+ * @return  0 on success, non-zero otherwise
+ */
 int sendControlPacket(int fd, byte ctrl, const char* file_name, size_t file_size);
 
+/**
+ * @brief   sends a control packet to the serial port data connection
+ * @param   fd          data connection file descriptor
+ * @param   msg_nr      message number
+ * @param   data        data buffer
+ * @param   data_size   data buffer size
+ * @return  0 on success, non-zero otherwise
+ */
 int sendDataPacket(int fd, byte msg_nr, byte* data, u_short data_size);
 
 
