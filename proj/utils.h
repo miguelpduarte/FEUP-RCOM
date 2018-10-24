@@ -12,6 +12,7 @@
 #define GET_N_BYTE_OF(x,n)  (((x) >> ((n)*8)) & 0xFF)
 
 typedef unsigned char byte;
+typedef unsigned short u_short;
 typedef unsigned int u_int;
 
 /** Structure regarding data stuffing information */
@@ -53,6 +54,6 @@ ssize_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer
  * @param   b   data byte to be stuffed
  * @return  16 bit stuffing result. If no stuffing occured, the MSB will be empty.
  */
-unsigned short stuffByte(byte b);
+u_short stuffByte(byte b);
 
 #endif // _UTILS_H_

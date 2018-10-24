@@ -33,7 +33,7 @@ int writeInfoMessage(int fd, const info_message_details_t info_message_details, 
 
     memcpy(msg_buf + MSG_DATA_BASE_IDX, data, data_size);
 
-    unsigned short stuffedBcc2 = stuffByte(info_message_details.bcc2);
+    u_short stuffedBcc2 = stuffByte(info_message_details.bcc2);
 
     // If BCC2 needs stuffing, flag has to be shifted
     if (GET_SHORT_MSB(stuffedBcc2) == MSG_ESCAPE_BYTE) {

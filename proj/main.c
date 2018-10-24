@@ -12,6 +12,12 @@
 #define OUTPUT_FILE "output.gif"
 
 int main(int argc, char * argv[]) {
+    
+    ////////////////////////////////////////////////
+    // TODO: CHANGE MAIN TO FIT APPLICATION LAYER //
+    ////////////////////////////////////////////////
+
+
     //1 = emitter, 0 = receiver
     if (argc != 2) {
         printf("Usage: %s <isReceiver?>\n", argv[0]);

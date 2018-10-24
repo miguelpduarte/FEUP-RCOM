@@ -64,8 +64,8 @@ ssize_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer
     return unstuffed_buffer_index;
 }
 
-unsigned short stuffByte(byte b) {
-    unsigned short stuffedByte;
+u_short stuffByte(byte b) {
+    u_short stuffedByte;
 
     if (b == MSG_FLAG) {
         stuffedByte = (MSG_ESCAPE_BYTE << 8) | MSG_FLAG_STUFFING_BYTE;
