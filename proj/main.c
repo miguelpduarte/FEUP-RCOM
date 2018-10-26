@@ -12,12 +12,6 @@
 #define OUTPUT_FILE "output.gif"
 
 int main(int argc, char * argv[]) {
-    
-    ////////////////////////////////////////////////
-    // TODO: CHANGE MAIN TO FIT APPLICATION LAYER //
-    ////////////////////////////////////////////////
-
-
     //1 = emitter, 0 = receiver
     if (argc != 2) {
         printf("Usage: %s <isReceiver?>\n", argv[0]);
@@ -25,55 +19,13 @@ int main(int argc, char * argv[]) {
     }
 
     set_config();
-
-    int serial_port_fd = get_serial_port_fd();
-
+    int fd = get_serial_port_fd();
     int isEmitter = atoi(argv[1]);
 
-    int ll_ret;
-
     if(isEmitter == EMITTER) {
-        ll_ret = llopen(serial_port_fd, EMITTER);
-
-        if (ll_ret < 0) {
-            fprintf(stderr, "emitter: llopen() function failed\n");
-            exit(-3);
-        } else {
-            printf("emitter: llopen() successful: %d.\n", ll_ret);
-        }
-
-        dyn_buffer_st* db = createBuffer();
-        if(readFile(INPUT_FILE, db) != 0) {
-            fprintf(stderr, "Error in reading from file!\n");
-            exit(-4);
-        }
-
-        llwrite(serial_port_fd, db->buf, db->length);
-        llclose(serial_port_fd);
-
-        deleteBuffer(&db);
+        sendFile(fd, "123");    // TODO: Complete this
     } else {
-        ll_ret = llopen(serial_port_fd, RECEIVER);
-
-        if (ll_ret < 0) {
-            fprintf(stderr, "receiver: llopen() function failed\n");
-            exit(-3);
-        } else {
-            printf("receiver: llopen() successful: %d.\n", ll_ret);
-        }
-
-        dyn_buffer_st * dyn_buffer = createBuffer();
-        if(dyn_buffer == NULL) {
-            fprintf(stderr, "Allocation of dynamic buffer failed\n");
-            exit(-4);
-        }
-
-        llread(serial_port_fd, dyn_buffer);
-
-        printf("Received message\n");
-        writeFile(OUTPUT_FILE, dyn_buffer);
-
-        deleteBuffer(&dyn_buffer);
+        retrieveFile(fd);
     }
 
     // TODO: What to do about this sleep?

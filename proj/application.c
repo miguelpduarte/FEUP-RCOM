@@ -37,8 +37,10 @@ int sendFile(int fd, const char* file_name) {
     printf("Reading from file\n");
 
     if(readFile(file_name, db) != 0) {
+        deleteBuffer(&db);
         return FILE_READ_FAILED;
     } else if (db->length == 0) {
+        deleteBuffer(&db);
         return -4;  // File cannot be empty
     }
 
@@ -46,6 +48,7 @@ int sendFile(int fd, const char* file_name) {
 
     // Establish communication with receiver
     if (llopen(fd, EMITTER) < 0) {
+        deleteBuffer(&db);
         return LLOPEN_FAILED;   
     }
 
@@ -54,6 +57,7 @@ int sendFile(int fd, const char* file_name) {
     // Send file info data (name and size)
     if (sendControlPacket(fd, APP_CTRL_START, file_name, db->length) != 0) {
         // TODO: WHat to do here?
+        deleteBuffer(&db);
         return PACKET_SENDING_FAILED;
     }
 
@@ -67,6 +71,7 @@ int sendFile(int fd, const char* file_name) {
         ret = sendDataPacket(fd, msg_nr, db->buf + i, data_size);
 
         if(ret != 0) {
+            deleteBuffer(&db);
             return PACKET_SENDING_FAILED;
         }
 
@@ -76,6 +81,7 @@ int sendFile(int fd, const char* file_name) {
     // Send file end packet (with name and size also)
     if (sendControlPacket(fd, APP_CTRL_END, file_name, db->length) != 0) {
         // TODO: WHat to do here?
+        deleteBuffer(&db);
         return PACKET_SENDING_FAILED;
     }
 
@@ -100,6 +106,7 @@ int retrieveFile(int fd) {
     printf("Waiting for connection\n");
     // Establish communication with receiver
     if (llopen(fd, RECEIVER) < 0) {
+        deleteBuffer(&db);
         return LLOPEN_FAILED;
     }
 
@@ -107,18 +114,20 @@ int retrieveFile(int fd) {
 
     // Read file
     if (llread(fd, db) != 0) {
+        deleteBuffer(&db);
         return FILE_READING_FAILED;
     }
 
     printf("\nData read successfully.\n");
 
     //Interpreting packets and writing to file
-
     if(interpretPackets(db) != 0) {
+        deleteBuffer(&db);
         fprintf(stderr, "Error interpreting data packets!\n");
         return -1;
     }
 
+    deleteBuffer(&db);
     printf("File created successfully\n");
 
     printf("\n\nDone.\n");
