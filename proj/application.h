@@ -31,11 +31,13 @@
 #define APP_FILE_NAME_V_IDX             9
 #define APP_CTRL_PACKET_SIZE(fname_len) sizeof(u_int) + fname_len + 5
 #define APP_DATA_PACKET_SIZE(data_len)  data_len + 4
+#define APP_DATA_PACKET_MAX_SIZE        2048
 
 
 #define LLOPEN_FAILED           -1
 #define BUFFER_ALLOC_FAILED     -2
 #define PACKET_SENDING_FAILED   -3
+#define FILE_READING_FAILED     -4
 
 /**
  * @brief   writes a file to the serial port data connection
@@ -51,27 +53,6 @@ int sendFile(int fd, const char* file_name);
  * @param   db   dynamic buffer reference
  * @return  0 on success, non-zero otherwise
  */
-int retrieveFile(dyn_buffer_st* db);
-
-/**
- * @brief   sends a control packet to the serial port data connection
- * @param   fd          data connection file descriptor
- * @param   ctrl        packet control octet
- * @param   file_name   file name
- * @param   file_size   file size
- * @return  0 on success, non-zero otherwise
- */
-int sendControlPacket(int fd, byte ctrl, const char* file_name, size_t file_size);
-
-/**
- * @brief   sends a control packet to the serial port data connection
- * @param   fd          data connection file descriptor
- * @param   msg_nr      message number
- * @param   data        data buffer
- * @param   data_size   data buffer size
- * @return  0 on success, non-zero otherwise
- */
-int sendDataPacket(int fd, byte msg_nr, byte* data, u_short data_size);
-
+int retrieveFile(int fd);
 
 #endif /* _APPLICATION_H_ */

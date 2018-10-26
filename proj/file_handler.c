@@ -47,6 +47,7 @@ int writeFile(const char * file_name, dyn_buffer_st * db) {
 		num_written = fwrite(db->buf + i, sizeof(*(db->buf)), num_to_write, file_ptr);
 
 		if(num_written != num_to_write) {
+			fclose(file_ptr);
 			return FILE_WRITE_FAILED;
 		}
 	}
