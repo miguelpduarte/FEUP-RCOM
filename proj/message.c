@@ -139,6 +139,7 @@ int receiverRead(int fd, dyn_buffer_st * dyn_buffer) {
                 msg_nr++;
             }
 
+    
             resetMsgState();
             //Writing the correct RR ()
             writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_RR(msg_nr));

@@ -44,7 +44,7 @@ int sendFile(int fd, const char* file_name) {
         return -4;  // File cannot be empty
     }
 
-    printf("Establishing connection\n");
+    printf("Establishing connection.\n");
 
     // Establish communication with receiver
     if (llopen(fd, EMITTER) < 0) {
@@ -52,7 +52,7 @@ int sendFile(int fd, const char* file_name) {
         return LLOPEN_FAILED;   
     }
 
-    printf("Connection established. Sending file\n");
+    printf("Connection established. Sending file.\n");
 
     // Send file info data (name and size)
     if (sendControlPacket(fd, APP_CTRL_START, file_name, db->length) != 0) {
@@ -85,7 +85,7 @@ int sendFile(int fd, const char* file_name) {
         return PACKET_SENDING_FAILED;
     }
 
-    printf("\nFile sent successfully. Closing connection\n");
+    printf("\nFile sent successfully. Closing connection.\n");
 
     // Close data connection
     llclose(fd);    
@@ -103,14 +103,14 @@ int retrieveFile(int fd) {
         return BUFFER_ALLOC_FAILED;
     }
 
-    printf("Waiting for connection\n");
+    printf("Waiting for connection.\n");
     // Establish communication with receiver
     if (llopen(fd, RECEIVER) < 0) {
         deleteBuffer(&db);
         return LLOPEN_FAILED;
     }
 
-    printf("Connection established. Reading file\n");
+    printf("Connection established, reading data.\n");
 
     // Read file
     if (llread(fd, db) != 0) {
@@ -118,7 +118,7 @@ int retrieveFile(int fd) {
         return FILE_READING_FAILED;
     }
 
-    printf("\nData read successfully.\n");
+    printf("\nData read successfully!\n");
 
     //Interpreting packets and writing to file
     if(interpretPackets(db) != 0) {
@@ -128,7 +128,7 @@ int retrieveFile(int fd) {
     }
 
     deleteBuffer(&db);
-    printf("File created successfully\n");
+    printf("File created successfully.\n");
 
     printf("\n\nDone.\n");
     return 0;
@@ -138,7 +138,7 @@ static int sendControlPacket(int fd, byte ctrl, const char* file_name, size_t fi
     size_t file_name_size = strlen(file_name) + 1;
     if(file_name_size > 255) {
         fprintf(stderr, "Due to system restrictions, the file name cannot be larger than 255 characters\n");
-        return -5;
+        return -65;
     }
 
     // Build Packet
@@ -216,7 +216,7 @@ static int interpretPackets(dyn_buffer_st * db) {
     char * file_name = malloc(file_name_size * sizeof(*file_name));
     if(file_name == NULL) {
         deleteBuffer(&file_content);
-        return -5;
+        return -55;
     }
     memcpy(file_name, db->buf + APP_FILE_NAME_V_IDX, file_name_size);
 
@@ -228,6 +228,7 @@ static int interpretPackets(dyn_buffer_st * db) {
     while(1) {       
         // Read ctrl byte and check for data termination
         curr_ctrl = db->buf[i];
+
         if (curr_ctrl == APP_CTRL_END) {
             break;
         } else if (curr_ctrl != APP_CTRL_DATA) {
@@ -245,6 +246,7 @@ static int interpretPackets(dyn_buffer_st * db) {
         packet_size = BYTE_TO_MSB(db->buf[i + 2]) + BYTE_TO_LSB(db->buf[i + 3]);
 
         concatBuffer(file_content, db->buf + i + 4, packet_size);
+
         i += APP_DATA_PACKET_SIZE(packet_size);
     }
 
@@ -257,5 +259,12 @@ static int interpretPackets(dyn_buffer_st * db) {
         return -7;
     }
 
-    return writeFile(file_name, file_content);
+    printf("Creating '%s'\n", file_name);
+
+    int write_file_ret = writeFile(file_name, file_content);
+
+    free(file_name);
+    deleteBuffer(&file_content);
+
+    return write_file_ret;
 }

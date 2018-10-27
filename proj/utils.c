@@ -50,8 +50,7 @@ ssize_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer
             } else if (data[data_index] == MSG_ESCAPE_STUFFING_BYTE) {
                 unstuffed_buffer[unstuffed_buffer_index++] = MSG_ESCAPE_BYTE;
             } else {
-                printf("Found invalid byte after escape byte! Unsure on how to proceed!\n");
-                // Found invalid byte after escape byte,    
+                // Found invalid byte after escape byte, marking message as corrupted   
                 return -1;
             }
         } else {
