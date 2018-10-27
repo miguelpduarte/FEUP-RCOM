@@ -33,7 +33,7 @@ int readFile(const char * file_name, dyn_buffer_st* db) {
 int writeFile(const char * file_name, dyn_buffer_st * db) {
 	FILE * file_ptr;
 
-	file_ptr = fopen(file_name, "wb");
+	file_ptr = fopen(file_name, "wb+");
 	if (file_ptr == NULL) {
 		fprintf(stderr, "File not found.\n");	// TODO: Shouldn't this create the file?
 		return FILE_NOT_FOUND;

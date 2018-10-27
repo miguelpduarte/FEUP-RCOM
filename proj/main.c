@@ -8,9 +8,6 @@
 #include "file_handler.h"
 #include "application.h"
 
-#define INPUT_FILE "pinguim.gif"
-#define OUTPUT_FILE "output.gif"
-
 int main(int argc, char * argv[]) {
     //1 = emitter, 0 = receiver
     if (argc != 2) {
@@ -23,7 +20,7 @@ int main(int argc, char * argv[]) {
     int isEmitter = atoi(argv[1]);
 
     if(isEmitter == EMITTER) {
-        sendFile(fd, "123");    // TODO: Complete this
+        sendFile(fd, "olaaa.txt");    // TODO: Complete this
     } else {
         retrieveFile(fd);
     }
