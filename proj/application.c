@@ -34,7 +34,7 @@ int sendFile(int fd, const char* file_name) {
         return BUFFER_ALLOC_FAILED;
     }
 
-    printf("Reading from file\n");
+    printf("Reading from file.\n");
 
     if(readFile(file_name, db) != 0) {
         deleteBuffer(&db);
@@ -48,6 +48,7 @@ int sendFile(int fd, const char* file_name) {
 
     // Establish communication with receiver
     if (llopen(fd, EMITTER) < 0) {
+        fprintf(stderr, "\nError: Connection timed out.\n");
         deleteBuffer(&db);
         return LLOPEN_FAILED;   
     }
@@ -85,7 +86,7 @@ int sendFile(int fd, const char* file_name) {
         return PACKET_SENDING_FAILED;
     }
 
-    printf("\nFile sent successfully. Closing connection.\n");
+    printf("\nFile sent successfully, closing connection.\n");
 
     // Close data connection
     llclose(fd);    
