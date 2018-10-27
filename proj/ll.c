@@ -7,7 +7,9 @@
 #include "utils.h"
 #include "state.h"
 
-static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size);
+
+static info_message_details_t msg_details = (info_message_details_t){.msg_nr = 0}; 
+static int writeAndRetryInfoMsg(const int fd, byte * stuffed_data, const size_t stuffed_data_size);
 
 int llopen(int fd, byte role) {
     if (role == EMITTER) {
@@ -53,8 +55,6 @@ int llwrite(int fd, byte* buffer, const size_t length) {
     size_t num_bytes_written = 0;
     data_stuffing_t ds;
 
-    info_message_details_t msg_details;
-    msg_details.msg_nr = 0;
     msg_details.addr = MSG_ADDR_EMT;
 
     byte stuffed_data_buffer[MSG_STUFFING_BUFFER_SIZE];
@@ -69,7 +69,7 @@ int llwrite(int fd, byte* buffer, const size_t length) {
         printf("Sending chunk number %d\n", msg_details.msg_nr);
 
         //Write message and proceed accordingly to return
-        if(writeAndRetryInfoMsg(fd, msg_details, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
+        if(writeAndRetryInfoMsg(fd, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
             return LLWRITE_FAILED;
         }
 
@@ -80,16 +80,16 @@ int llwrite(int fd, byte* buffer, const size_t length) {
     return 0;
 }
 
-static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size) {
+static int writeAndRetryInfoMsg(const int fd, byte * stuffed_data, const size_t stuffed_data_size) {
     int current_attempt = 0;
     int response = 0, num_bytes_written;
-    const byte msg_nr_S = MSG_CTRL_S(info_message_details.msg_nr);
+    const byte msg_nr_S = MSG_CTRL_S(msg_details.msg_nr);
 
     do {
         current_attempt++;
         printf("\tAttempt number: %d\n", current_attempt);
 
-        num_bytes_written = writeInfoMessage(fd, info_message_details, stuffed_data, stuffed_data_size);
+        num_bytes_written = writeInfoMessage(fd, msg_details, stuffed_data, stuffed_data_size);
         if(num_bytes_written != 0) {
             printf("\tFailed to write full chunk\n");
             continue;

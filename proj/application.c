@@ -182,7 +182,7 @@ static int sendDataPacket(int fd, byte msg_nr, byte* data, u_short data_size) {
     memcpy(packet + APP_DATA_START_IDX, data, data_size);
 
     // Send Packet
-    int ll_ret = llwrite(fd, data, APP_DATA_PACKET_SIZE(data_size) * sizeof(*packet));
+    int ll_ret = llwrite(fd, packet, APP_DATA_PACKET_SIZE(data_size) * sizeof(*packet));
     free(packet);
 
     return ll_ret;

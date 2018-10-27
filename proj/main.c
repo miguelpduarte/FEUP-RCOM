@@ -20,7 +20,7 @@ int main(int argc, char * argv[]) {
     int isEmitter = atoi(argv[1]);
 
     if(isEmitter == EMITTER) {
-        sendFile(fd, "olaaa.txt");    // TODO: Complete this
+        sendFile(fd, "foto.jpg");    // TODO: Complete this
     } else {
         retrieveFile(fd);
     }
