@@ -22,11 +22,11 @@
 #define MSG_CTRL_SET            0x03                        /* Setup */
 #define MSG_CTRL_DISC           0x0B                        /* Disconnect */
 #define MSG_CTRL_UA             0x07                        /* Unnumbered Acknowledgement */
-#define MSG_CTRL_RR(r)          0x05 | (r ? BIT(7) : 0x00)  /* Receiver Ready (positive ACK) */
+#define MSG_CTRL_RR(r)          0x05 | (((r) % 2) ? BIT(7) : 0x00)  /* Receiver Ready (positive ACK) */
 #define MSG_CTRL_RR_0           0x05
 #define MSG_CTRL_RR_1           0x85
-#define MSG_CTRL_RR_DECODE(b)   ((b) >> 7);
-#define MSG_CTRL_REJ(r)         0x01 | (r ? BIT(7) : 0x00)  /* Reject (negative ACK) */
+#define MSG_CTRL_RR_DECODE(b)   ((b) >> 7)
+#define MSG_CTRL_REJ(r)         0x01 | (((r) % 2) ? BIT(7) : 0x00)  /* Reject (negative ACK) */
 #define MSG_CTRL_REJ_0          0x01
 #define MSG_CTRL_REJ_1          0x81
 #define MSG_CTRL_REJ_DECODE(b)  ((b) >> 7);
@@ -70,6 +70,7 @@
 
 //other
 #define DATA_SIZE_FROM_INFO_MSG_LENGTH(msg_length)      ((msg_length) - 6)
+#define RECEIVED_REJ                                  3
 
 
 #endif /* _MESSAGE_DEFINES_ */

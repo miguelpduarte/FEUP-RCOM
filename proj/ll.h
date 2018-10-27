@@ -42,7 +42,7 @@ int llclose(int fd);
  * @param   fd      data connection file descriptor
  * @param   buffer  buffer message
  * @param   length  buffer message number of bytes
- * @return  number of written bytes, negative number on failure
+ * @return  0 on success, negative number on failure
 */
 int llwrite(int fd, byte* buffer, const size_t length);
 

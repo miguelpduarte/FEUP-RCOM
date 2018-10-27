@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "state.h"
 #include "utils.h"
 
@@ -180,7 +181,14 @@ static void handleReceivingData(byte msg_byte) {
 
 static void handleFinalFlagRcv() {
     // First, unstuff the message
-    state_machine.unstuffed_msg_size = unstuffData(state_machine.msg, state_machine.msg_index, state_machine.unstuffed_msg);
+    ssize_t res = unstuffData(state_machine.msg, state_machine.msg_index, state_machine.unstuffed_msg);
+
+    if (res < 0) {
+        setState(MSG_ERROR);
+        return;
+    }
+
+    state_machine.unstuffed_msg_size = (size_t) res;
 
     // Then, calculate the bcc2 of the unstuffed message
     // (Subtracting 1 to not count bcc2 in the bcc2 calculation)

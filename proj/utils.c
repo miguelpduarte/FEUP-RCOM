@@ -38,7 +38,7 @@ data_stuffing_t stuffData(byte * data, const size_t data_size, const size_t data
     return ds;
 }
 
-size_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer) {
+ssize_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer) {
     size_t data_index = 0, unstuffed_buffer_index = 0;
 
     while(data_index < data_size) {
@@ -50,8 +50,8 @@ size_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer)
             } else if (data[data_index] == MSG_ESCAPE_STUFFING_BYTE) {
                 unstuffed_buffer[unstuffed_buffer_index++] = MSG_ESCAPE_BYTE;
             } else {
-                printf("Found invalid byte after escape byte! Unsure on how to proceed!\n");
-                exit(-1);
+                // Found invalid byte after escape byte, marking message as corrupted   
+                return -1;
             }
         } else {
             unstuffed_buffer[unstuffed_buffer_index++] = data[data_index];
@@ -63,8 +63,8 @@ size_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer)
     return unstuffed_buffer_index;
 }
 
-unsigned short stuffByte(byte b) {
-    unsigned short stuffedByte;
+u_short stuffByte(byte b) {
+    u_short stuffedByte;
 
     if (b == MSG_FLAG) {
         stuffedByte = (MSG_ESCAPE_BYTE << 8) | MSG_FLAG_STUFFING_BYTE;
@@ -75,4 +75,26 @@ unsigned short stuffByte(byte b) {
     }
 
     return stuffedByte;
+}
+
+void clearProgressBar() {
+    int i;
+    for (i = 0; i < NUM_BACKSPACES; ++i) {
+        fprintf(stdout, "\b");
+    }
+    fflush(stdout);
+}
+
+void printProgressBar(int progress, int total) {
+    int i, percentage = (int)((((double)progress) / total) * 100);
+    int num_separators = (int)((((double)progress) / total) * PROGRESS_BAR_SIZE);;
+    fprintf(stdout, "[");
+    for (i = 0; i < num_separators; ++i) {
+        fprintf(stdout, "%c", SEPARATOR_CHAR);
+    }
+    for (; i < PROGRESS_BAR_SIZE; ++i) {
+        fprintf(stdout, " ");
+    }
+    fprintf(stdout, "]  %2d%%  ", percentage);
+    fflush(stdout);
 }

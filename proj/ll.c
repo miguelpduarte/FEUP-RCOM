@@ -7,23 +7,21 @@
 #include "utils.h"
 #include "state.h"
 
-static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size);
+
+static info_message_details_t msg_details = (info_message_details_t){.msg_nr = 0}; 
+static int writeAndRetryInfoMsg(const int fd, byte * stuffed_data, const size_t stuffed_data_size);
 
 int llopen(int fd, byte role) {
     if (role == EMITTER) {
-        printf("entered as emitter\n");
         int num_tries, ret;
         for (num_tries = 0; num_tries < MSG_NUM_READ_TRIES; num_tries++) {
-            printf("will write sup SET, retry #%d\n", num_tries);
             ret = writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_SET);
             if(ret != 0) {
                 continue;
             }
 
-            printf("now waiting for UA, retry #%d\n", num_tries);
             ret = readSupervisionMessage(fd);
             if(ret != MSG_SUPERVISION_MSG_SIZE || getMsgCtrl() != MSG_CTRL_UA) {
-                printf("continuiiiiing, retry #%d\n", num_tries);
                 continue;
             } else {
                 return COMMUNICATION_IDENTIFIER;
@@ -32,11 +30,9 @@ int llopen(int fd, byte role) {
 
         return ESTABLISH_DATA_CONNECTION_FAILED;        
     } else if (role == RECEIVER) {
-        printf("entered as receiver\n");
         // Wait until transmitter tries to start communication
         int ret;
         do {
-            printf("waiting for sup SET\n");
             ret = readSupervisionMessage(fd);
 
             if (ret != MSG_SUPERVISION_MSG_SIZE) {
@@ -44,17 +40,14 @@ int llopen(int fd, byte role) {
             }
         } while (getMsgCtrl() != MSG_CTRL_SET);
 
-        printf("recevahsdh sup SET, wreritng UA\n");
         ret = writeSupWithRetry(fd, MSG_ADDR_REC, MSG_CTRL_UA);
         if (ret != 0) {
-            printf("UA wrinte failed\n");
             return WRITE_SUPERVISION_MSG_FAILED;
         }        
     } else {
         return INVALID_COMMUNICATION_ROLE;
     }
 
-    printf("COMM SUCCESSFULLY OPENENED\n");
     return COMMUNICATION_IDENTIFIER;
 }
 
@@ -62,8 +55,6 @@ int llwrite(int fd, byte* buffer, const size_t length) {
     size_t num_bytes_written = 0;
     data_stuffing_t ds;
 
-    info_message_details_t msg_details;
-    msg_details.msg_nr = 0;
     msg_details.addr = MSG_ADDR_EMT;
 
     byte stuffed_data_buffer[MSG_STUFFING_BUFFER_SIZE];
@@ -76,7 +67,7 @@ int llwrite(int fd, byte* buffer, const size_t length) {
         num_bytes_written += ds.data_bytes_stuffed;
 
         //Write message and proceed accordingly to return
-        if(writeAndRetryInfoMsg(fd, msg_details, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
+        if(writeAndRetryInfoMsg(fd, stuffed_data_buffer, ds.stuffed_buffer_size) != 0) {
             return LLWRITE_FAILED;
         }
 
@@ -87,21 +78,24 @@ int llwrite(int fd, byte* buffer, const size_t length) {
     return 0;
 }
 
-static int writeAndRetryInfoMsg(const int fd, const info_message_details_t info_message_details, byte * stuffed_data, const size_t stuffed_data_size) {
+static int writeAndRetryInfoMsg(const int fd, byte * stuffed_data, const size_t stuffed_data_size) {
     int current_attempt = 0;
     int response = 0, num_bytes_written;
-    const byte msg_nr_S = MSG_CTRL_S(info_message_details.msg_nr);
+    const byte msg_nr_S = MSG_CTRL_S(msg_details.msg_nr);
 
     do {
         current_attempt++;
 
-        num_bytes_written = writeInfoMessage(fd, info_message_details, stuffed_data, stuffed_data_size);
-        if(num_bytes_written != stuffed_data_size) {
+        num_bytes_written = writeInfoMessage(fd, msg_details, stuffed_data, stuffed_data_size);
+        if(num_bytes_written != 0) {
             continue;
         }
 
         response = readInfoMsgResponse(fd, msg_nr_S);
         if(response == msg_nr_S) {
+            continue;
+        } else if(response == RECEIVED_REJ) {
+            current_attempt = 0;
             continue;
         } else {
             return 0;
