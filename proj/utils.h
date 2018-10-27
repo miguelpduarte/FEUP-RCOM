@@ -10,6 +10,9 @@
 #define BYTE_TO_LSB(x)      ((x) & 0xFF)
 #define BYTE_TO_MSB(x)      (((x) & 0xFF) << 8)
 #define GET_N_BYTE_OF(x,n)  (((x) >> ((n)*8)) & 0xFF)
+#define PROGRESS_BAR_SIZE   30
+#define SEPARATOR_CHAR      '='
+#define NUM_BACKSPACES      PROGRESS_BAR_SIZE + 9
 
 typedef unsigned char byte;
 typedef unsigned short u_short;
@@ -55,5 +58,9 @@ ssize_t unstuffData(byte * data, const size_t data_size, byte * unstuffed_buffer
  * @return  16 bit stuffing result. If no stuffing occured, the MSB will be empty.
  */
 u_short stuffByte(byte b);
+
+void printProgressBar(int progress, int total);
+
+void clearProgressBar();
 
 #endif // _UTILS_H_

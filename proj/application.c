@@ -53,7 +53,7 @@ int sendFile(int fd, const char* file_name) {
         return LLOPEN_FAILED;   
     }
 
-    printf("Connection established. Sending file.\n");
+    printf("Connection established. Sending file.\n\n");
 
     // Send file info data (name and size)
     if (sendControlPacket(fd, APP_CTRL_START, file_name, db->length) != 0) {
@@ -68,6 +68,8 @@ int sendFile(int fd, const char* file_name) {
     u_short data_size = 0;
     byte msg_nr = 0;
     for (i = 0; i < db->length; i += data_size) {
+        printProgressBar(i, db->length);
+
         data_size = MIN(db->length - i, APP_DATA_PACKET_MAX_SIZE);
         ret = sendDataPacket(fd, msg_nr, db->buf + i, data_size);
 
@@ -77,7 +79,10 @@ int sendFile(int fd, const char* file_name) {
         }
 
         msg_nr++;
+        clearProgressBar();
     }
+
+    printProgressBar(1, 1);
 
     // Send file end packet (with name and size also)
     if (sendControlPacket(fd, APP_CTRL_END, file_name, db->length) != 0) {
@@ -86,7 +91,7 @@ int sendFile(int fd, const char* file_name) {
         return PACKET_SENDING_FAILED;
     }
 
-    printf("\nFile sent successfully, closing connection.\n");
+    printf("\n\nFile sent successfully, closing connection.\n");
 
     // Close data connection
     llclose(fd);    
