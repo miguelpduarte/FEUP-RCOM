@@ -38,6 +38,13 @@
 #define BUFFER_ALLOC_FAILED     -2
 #define PACKET_SENDING_FAILED   -3
 #define FILE_READING_FAILED     -4
+#define EMPTY_FILE              -5
+#define PACKET_INTERPRETE_FAIL  -6
+#define FILE_NAME_SIZE_OVERFLOW -7
+#define BAD_START_PACKET        -8
+#define BAD_DATA_PACKET         -9
+#define BAD_FINAL_PACKET        -10
+
 
 /**
  * @brief   writes a file to the serial port data connection

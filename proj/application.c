@@ -25,6 +25,11 @@ static int sendControlPacket(int fd, byte ctrl, const char* file_name, size_t fi
  */
 static int sendDataPacket(int fd, byte msg_nr, byte* data, u_short data_size);
 
+/**
+ * @brief   interpretes the packets received to verify file validity
+ * @param   dynamic buffer reference, containing all the packets received
+ * @return  0 on success, non-zero otherwise
+ */
 static int interpretPackets(dyn_buffer_st * db);
 
 int sendFile(int fd, const char* file_name) {
@@ -41,7 +46,7 @@ int sendFile(int fd, const char* file_name) {
         return FILE_READ_FAILED;
     } else if (db->length == 0) {
         deleteBuffer(&db);
-        return -4;  // File cannot be empty
+        return EMPTY_FILE;
     }
 
     printf("Establishing connection.\n");
@@ -130,7 +135,7 @@ int retrieveFile(int fd) {
     if(interpretPackets(db) != 0) {
         deleteBuffer(&db);
         fprintf(stderr, "Error interpreting data packets!\n");
-        return -1;
+        return PACKET_INTERPRETE_FAIL;
     }
 
     deleteBuffer(&db);
@@ -144,13 +149,13 @@ static int sendControlPacket(int fd, byte ctrl, const char* file_name, size_t fi
     size_t file_name_size = strlen(file_name) + 1;
     if(file_name_size > 255) {
         fprintf(stderr, "Due to system restrictions, the file name cannot be larger than 255 characters\n");
-        return -65;
+        return FILE_NAME_SIZE_OVERFLOW;
     }
 
     // Build Packet
     byte* packet = malloc(APP_CTRL_PACKET_SIZE(file_name_size) * sizeof(*packet));
     if (packet == NULL) {
-        return -60;
+        return OUT_OF_MEMORY;
     }
 
     packet[APP_CTRL_IDX] = ctrl;
@@ -177,7 +182,7 @@ static int sendDataPacket(int fd, byte msg_nr, byte* data, u_short data_size) {
     // Build Packet
     byte* packet = malloc(APP_DATA_PACKET_SIZE(data_size) * sizeof(*packet));
     if (packet == NULL) {
-        return -60;
+        return OUT_OF_MEMORY;
     }
 
     packet[APP_CTRL_IDX] = APP_CTRL_DATA;
@@ -197,16 +202,16 @@ static int sendDataPacket(int fd, byte msg_nr, byte* data, u_short data_size) {
 static int interpretPackets(dyn_buffer_st * db) {
     //Interpret initial control packet
     if (db->buf[APP_CTRL_IDX] != APP_CTRL_START) {
-        return -1;
+        return BAD_START_PACKET;
     }
 
     if (db->buf[APP_FILE_SIZE_T_IDX] != APP_FILE_SIZE_OCTET) {
-        return -2;
+        return BAD_START_PACKET;
     }
 
     dyn_buffer_st * file_content = createBuffer();
     if (file_content == NULL) {
-        return -3;
+        return OUT_OF_MEMORY;
     }
 
     u_int file_size = 0;
@@ -214,7 +219,7 @@ static int interpretPackets(dyn_buffer_st * db) {
 
     if (db->buf[APP_FILE_NAME_T_IDX] != APP_FILE_NAME_OCTET) {
         deleteBuffer(&file_content);
-        return -4;
+        return BAD_START_PACKET;
     }
 
     byte file_name_size = db->buf[APP_FILE_NAME_L_IDX];
@@ -222,7 +227,7 @@ static int interpretPackets(dyn_buffer_st * db) {
     char * file_name = malloc(file_name_size * sizeof(*file_name));
     if(file_name == NULL) {
         deleteBuffer(&file_content);
-        return -55;
+        return OUT_OF_MEMORY;
     }
     memcpy(file_name, db->buf + APP_FILE_NAME_V_IDX, file_name_size);
 
@@ -240,13 +245,13 @@ static int interpretPackets(dyn_buffer_st * db) {
         } else if (curr_ctrl != APP_CTRL_DATA) {
             free(file_name);
             deleteBuffer(&file_content);
-            return -5;
+            return BAD_DATA_PACKET;
         }
 
         if (msg_nr++ != db->buf[i + 1]) {
             free(file_name);
             deleteBuffer(&file_content);
-            return -6;
+            return BAD_DATA_PACKET;
         }
 
         packet_size = BYTE_TO_MSB(db->buf[i + 2]) + BYTE_TO_LSB(db->buf[i + 3]);
@@ -257,12 +262,8 @@ static int interpretPackets(dyn_buffer_st * db) {
     }
 
     //Interpret final control packet
-    if (db->buf[i + 1] != APP_FILE_SIZE_OCTET) {
-        return -2;
-    }
-
     if (memcmp(db->buf + 1, db->buf + i + 1, file_name_size + 8) != 0) {
-        return -7;
+        return BAD_FINAL_PACKET;
     }
 
     printf("Creating '%s'\n", file_name);
