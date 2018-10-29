@@ -53,6 +53,8 @@ void set_config() {
 }
 
 void reset_config() {
+    sleep(2);  
+
     if (tcsetattr(serial_port_fd, TCSANOW, &old_termio) == -1) {
         perror("tcsetattr reset");
         exit(-4);

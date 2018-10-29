@@ -17,10 +17,11 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
 
-    printf("good params\n");
-    return 0;
-
     set_config();
+
+    // Install exit handler to act if anything fails
+    atexit(reset_config);
+
     int fd = get_serial_port_fd();
 
     if(strcmp(argv[1],"emitter") == 0) {
@@ -28,10 +29,6 @@ int main(int argc, char * argv[]) {
     } else {
         retrieveFile(fd);
     }
-
-    // TODO: What to do about this sleep?
-    sleep(2);   
-    reset_config();
 
     return 0;
 }
