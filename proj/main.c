@@ -45,8 +45,8 @@ int main(int argc, char * argv[]) {
     }
 
     clock_t end_time = clock();
-    float elapsed_time = (float)(end_time - start_time);
-    printf("Elapsed time: %f\n", elapsed_time);
+    float elapsed_time = (float)(end_time - start_time)/10000;
+    printf("Elapsed time: %f\ns", elapsed_time);
 
     return 0;
 }

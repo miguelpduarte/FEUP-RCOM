@@ -290,7 +290,7 @@ static int interpretPackets(dyn_buffer_st * db) {
 }
 
 void printTransferInfo(int isReceiver) {
-    printf("Number of Packets %s: %zu\n", isReceiver ? "received" : "sent", num_packets);
+    printf("\nNumber of Packets %s: %zu\n", isReceiver ? "received" : "sent", num_packets);
     printf("Number of RRs %s: %zu\n", isReceiver ? "received" : "sent", getNumRRs());
     printf("Number of REJs %s: %zu\n", isReceiver ? "received" : "sent", getNumRejs());
 }
