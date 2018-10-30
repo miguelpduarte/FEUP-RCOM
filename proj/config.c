@@ -30,7 +30,7 @@ void set_config() {
     if (tcgetattr(serial_port_fd, &old_termio) == -1) {
         // save current port settings
         perror("tcgetattr");
-        exit(-1);
+        exit(-2);
     }
 
     bzero(&new_termio, sizeof(new_termio));
@@ -48,7 +48,7 @@ void set_config() {
 
     if (tcsetattr(serial_port_fd, TCSANOW, &new_termio) == -1) {
         perror("tcsetattr");
-        exit(-2);
+        exit(-3);
     }
 }
 

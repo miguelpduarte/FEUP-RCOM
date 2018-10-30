@@ -9,12 +9,16 @@
 #include "file_handler.h"
 #include "application.h"
 
+#define INVALID_ARGUMENTS       1
+#define FILE_SENDING_FAILED     2
+#define FILE_RECEIVING_FAILED   3
+
 int main(int argc, char * argv[]) {
     //1 = emitter, 0 = receiver
     if (!(argc == 2 && strcmp(argv[1],"receiver") == 0) &&
         !(argc == 3 && strcmp(argv[1],"emitter") == 0)) {
         fprintf(stderr, "usage: %s [receiver | emitter <file_name>]\n", argv[0]);
-        exit(1);
+        exit(INVALID_ARGUMENTS);
     }
 
     set_config();
@@ -25,9 +29,15 @@ int main(int argc, char * argv[]) {
     int fd = get_serial_port_fd();
 
     if(strcmp(argv[1],"emitter") == 0) {
-        sendFile(fd, argv[2]);    // TODO: Complete this
+        if (sendFile(fd, argv[2]) != 0) {
+            fprintf(stderr, "File sending failed.\n");
+            return FILE_SENDING_FAILED;
+        }
     } else {
-        retrieveFile(fd);
+        if (retrieveFile(fd) != 0) {
+            fprintf(stderr, "File receiving failed.\n");
+            return FILE_RECEIVING_FAILED;
+        }
     }
 
     return 0;
