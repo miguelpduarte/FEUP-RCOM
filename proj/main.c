@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "time.h"
 #include "dyn_buffer.h"
 #include "utils.h"
 #include "file_handler.h"
@@ -27,6 +28,8 @@ int main(int argc, char * argv[]) {
 
     int fd = get_serial_port_fd();
 
+    clock_t start_time = clock();
+
     if(strcmp(argv[1],"emitter") == 0) {
         if (sendFile(fd, argv[2]) != 0) {
             fprintf(stderr, "File sending failed.\n");
@@ -40,6 +43,10 @@ int main(int argc, char * argv[]) {
         }
         printTransferInfo(RECEIVER);
     }
+
+    clock_t end_time = clock();
+    float elapsed_time = (float)(end_time - start_time);
+    printf("Elapsed time: %f\n", elapsed_time);
 
     return 0;
 }
