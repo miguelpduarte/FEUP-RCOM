@@ -3,6 +3,9 @@
 
 #include <stdlib.h>
 
+#define EMITTER     0
+#define RECEIVER    1
+
 #define MIN(x,y)        (((x) < (y)) ? (x) : (y))
 #define MAX(x,y)        (((x) > (y)) ? (x) : (y))
 #define GET_SHORT_LSB(x)    ( (x) & 0x00FF)

@@ -67,4 +67,8 @@ int receiverRead(int fd, dyn_buffer_st * dyn_buffer);
  */
 int writeSupWithRetry(int fd, byte addr, byte ctrl);
 
+size_t getNumRRs();
+
+size_t getNumRejs();
+
 #endif /* _MESSAGE_ */

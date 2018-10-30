@@ -7,6 +7,9 @@
 #include <string.h>
 #include "dyn_buffer.h"
 
+static size_t num_rejs;
+static size_t num_rrs;
+
 int writeSupervisionMessage(int fd, byte msg_addr, byte msg_ctrl) {
     byte msg_buf[MSG_SUPERVISION_MSG_SIZE];
 
@@ -66,8 +69,10 @@ byte readInfoMsgResponse(int fd, byte msg_nr_S) {
         byte msg_ctrl = getMsgCtrl();
 
         if (msg_ctrl == MSG_CTRL_RR_0 || msg_ctrl == MSG_CTRL_RR_1) {
+            num_rrs++;
             return MSG_CTRL_RR_DECODE(msg_ctrl);
         } else if (msg_ctrl == MSG_CTRL_REJ_0 || msg_ctrl == MSG_CTRL_REJ_1) {
+            num_rejs++;
             return RECEIVED_REJ;
         } else {
             return msg_nr_S;
@@ -138,17 +143,18 @@ int receiverRead(int fd, dyn_buffer_st * dyn_buffer) {
                 // ready to receive next message
                 msg_nr++;
             }
-
     
             resetMsgState();
             //Writing the correct RR ()
             writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_RR(msg_nr));
+            num_rrs++;
 
         } else if (getState() == MSG_ERROR) {
             resetMsgState();
 
             // ask for message resend
             writeSupWithRetry(fd, MSG_ADDR_EMT, MSG_CTRL_REJ(msg_nr));
+            num_rejs++;
         }
     }
 
@@ -170,4 +176,12 @@ int writeSupWithRetry(int fd, byte addr, byte ctrl) {
     }
 
     return WRITE_SUP_MSG_FAILED;
+}
+
+size_t getNumRRs(){
+    return num_rrs;
+}
+
+size_t getNumRejs(){
+    return num_rejs;
 }

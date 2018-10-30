@@ -62,4 +62,9 @@ int sendFile(int fd, const char* file_name);
  */
 int retrieveFile(int fd);
 
+/**
+ *
+ */
+void printTransferInfo(int isReceiver);
+
 #endif /* _APPLICATION_H_ */

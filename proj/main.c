@@ -5,7 +5,6 @@
 #include "config.h"
 #include "dyn_buffer.h"
 #include "utils.h"
-#include "ll.h"
 #include "file_handler.h"
 #include "application.h"
 
@@ -33,11 +32,13 @@ int main(int argc, char * argv[]) {
             fprintf(stderr, "File sending failed.\n");
             return FILE_SENDING_FAILED;
         }
+        printTransferInfo(EMITTER);
     } else {
         if (retrieveFile(fd) != 0) {
             fprintf(stderr, "File receiving failed.\n");
             return FILE_RECEIVING_FAILED;
         }
+        printTransferInfo(RECEIVER);
     }
 
     return 0;

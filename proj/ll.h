@@ -6,9 +6,6 @@
 #include "dyn_buffer.h"
 #include <stdlib.h>
 
-#define EMITTER     0
-#define RECEIVER    1
-
 // Errors
 #define WRITE_SUPERVISION_MSG_FAILED        -1
 #define INVALID_COMMUNICATION_ROLE          -2

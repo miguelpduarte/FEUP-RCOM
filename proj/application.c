@@ -1,9 +1,12 @@
 #include "application.h"
 #include "dyn_buffer.h"
 #include "ll.h"
+#include "message.h"
 #include "file_handler.h"
 #include <string.h>
 #include <stdio.h>
+
+static size_t num_packets;
 
 /**
  * @brief   sends a control packet to the serial port data connection
@@ -67,6 +70,8 @@ int sendFile(int fd, const char* file_name) {
         return PACKET_SENDING_FAILED;
     }
 
+    num_packets++;
+
     // Send file content
     int i;
     int ret;
@@ -82,6 +87,8 @@ int sendFile(int fd, const char* file_name) {
             deleteBuffer(&db);
             return PACKET_SENDING_FAILED;
         }
+        
+        num_packets++;
 
         msg_nr++;
         clearProgressBar();
@@ -96,13 +103,14 @@ int sendFile(int fd, const char* file_name) {
         return PACKET_SENDING_FAILED;
     }
 
+    num_packets++;
     printf("\n\nFile sent successfully, closing connection.\n");
 
     // Close data connection
     llclose(fd);    
     deleteBuffer(&db);
 
-    printf("Connection closed.\n\nDone.");
+    printf("Connection closed.\n\nDone.\n");
 
     return 0;
 }
@@ -231,6 +239,8 @@ static int interpretPackets(dyn_buffer_st * db) {
     }
     memcpy(file_name, db->buf + APP_FILE_NAME_V_IDX, file_name_size);
 
+    num_packets++;
+
     size_t i = APP_FILE_NAME_V_IDX + file_name_size;
     byte curr_ctrl;
     byte msg_nr;
@@ -257,6 +267,7 @@ static int interpretPackets(dyn_buffer_st * db) {
         packet_size = BYTE_TO_MSB(db->buf[i + 2]) + BYTE_TO_LSB(db->buf[i + 3]);
 
         concatBuffer(file_content, db->buf + i + 4, packet_size);
+        num_packets++;
 
         i += APP_DATA_PACKET_SIZE(packet_size);
     }
@@ -266,6 +277,8 @@ static int interpretPackets(dyn_buffer_st * db) {
         return BAD_FINAL_PACKET;
     }
 
+    num_packets++;
+
     printf("Creating '%s'\n", file_name);
 
     int write_file_ret = writeFile(file_name, file_content);
@@ -274,4 +287,10 @@ static int interpretPackets(dyn_buffer_st * db) {
     deleteBuffer(&file_content);
 
     return write_file_ret;
+}
+
+void printTransferInfo(int isReceiver) {
+    printf("Number of Packets %s: %zu\n", isReceiver ? "received" : "sent", num_packets);
+    printf("Number of RRs %s: %zu\n", isReceiver ? "received" : "sent", getNumRRs());
+    printf("Number of REJs %s: %zu\n", isReceiver ? "received" : "sent", getNumRejs());
 }
