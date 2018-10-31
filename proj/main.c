@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "config.h"
 #include "dyn_buffer.h"
@@ -29,11 +28,6 @@ int main(int argc, char * argv[]) {
 
     int fd = get_serial_port_fd();
 
-    int t_measure1, t_measure2;
-    struct timespec start_time, end_time;
-
-    t_measure1 = clock_gettime(CLOCK_REALTIME, &start_time);
-
     if(strcmp(argv[1],"emitter") == 0) {
         if (sendFile(fd, argv[2]) != 0) {
             fprintf(stderr, "\nFile sending failed.\n");
@@ -46,17 +40,6 @@ int main(int argc, char * argv[]) {
             return FILE_RECEIVING_FAILED;
         }
         printTransferInfo(RECEIVER);
-    }
-
-    t_measure2 = clock_gettime(CLOCK_REALTIME, &end_time);
-
-    if (t_measure1 == -1 || t_measure2 == -1) {
-        fprintf(stderr, "Failed to measure elapsed time.");
-    } else {
-        double elapsed_time = ( end_time.tv_sec - start_time.tv_sec )
-                            + ( end_time.tv_nsec - start_time.tv_nsec )
-                            / 1e9;
-        printf("Elapsed time: %lfs\n", elapsed_time);
     }
 
     return 0;
