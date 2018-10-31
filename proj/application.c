@@ -2,10 +2,10 @@
 #include "dyn_buffer.h"
 #include "ll.h"
 #include "message.h"
-#include <time.h>
 #include "file_handler.h"
 #include <string.h>
 #include <stdio.h>
+#include "chrono.h"
 
 static size_t num_packets;
 
@@ -64,10 +64,7 @@ int sendFile(int fd, const char* file_name) {
 
     printf("Connection established. Sending file.\n\n");
 
-    int t_measure1, t_measure2;
-    struct timespec start_time, end_time;
-
-    t_measure1 = clock_gettime(CLOCK_REALTIME, &start_time);
+    start_clock();
     
     // Send file info data (name and size)
     if (sendControlPacket(fd, APP_CTRL_START, file_name, db->length) != 0) {
@@ -109,16 +106,8 @@ int sendFile(int fd, const char* file_name) {
         return PACKET_SENDING_FAILED;
     }
 
-    t_measure2 = clock_gettime(CLOCK_REALTIME, &end_time);
-
-    if (t_measure1 == -1 || t_measure2 == -1) {
-        fprintf(stderr, "Failed to measure elapsed time.");
-    } else {
-        double elapsed_time = ( end_time.tv_sec - start_time.tv_sec )
-                            + ( end_time.tv_nsec - start_time.tv_nsec )
-                            / 1e9;
-        printf("Elapsed time: %lfs\n", elapsed_time);
-    }
+    stop_clock();
+    print_clock_diff();
 
     num_packets++;
     printf("\n\nFile sent successfully, closing connection.\n");
