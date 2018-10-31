@@ -31,7 +31,7 @@
 #define APP_FILE_NAME_V_IDX             9
 #define APP_CTRL_PACKET_SIZE(fname_len) sizeof(u_int) + fname_len + 5
 #define APP_DATA_PACKET_SIZE(data_len)  data_len + 4
-#define APP_DATA_PACKET_MAX_SIZE        2048
+#define APP_DATA_PACKET_MAX_SIZE        4096
 
 
 #define LLOPEN_FAILED           -1

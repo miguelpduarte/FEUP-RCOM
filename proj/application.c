@@ -68,7 +68,6 @@ int sendFile(int fd, const char* file_name) {
     
     // Send file info data (name and size)
     if (sendControlPacket(fd, APP_CTRL_START, file_name, db->length) != 0) {
-        // TODO: WHat to do here?
         deleteBuffer(&db);
         return PACKET_SENDING_FAILED;
     }
@@ -81,7 +80,7 @@ int sendFile(int fd, const char* file_name) {
     u_short data_size = 0;
     byte msg_nr = 0;
     for (i = 0; i < db->length; i += data_size) {
-        //printProgressBar(i, db->length);
+        printProgressBar(i, db->length);
 
         data_size = MIN(db->length - i, APP_DATA_PACKET_MAX_SIZE);
         ret = sendDataPacket(fd, msg_nr, db->buf + i, data_size);
@@ -94,10 +93,10 @@ int sendFile(int fd, const char* file_name) {
         num_packets++;
 
         msg_nr++;
-        //clearProgressBar();
+        clearProgressBar();
     }
 
-    //printProgressBar(1, 1);
+    printProgressBar(1, 1);
 
     // Send file end packet (with name and size also)
     if (sendControlPacket(fd, APP_CTRL_END, file_name, db->length) != 0) {
