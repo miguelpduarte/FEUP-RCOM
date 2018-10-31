@@ -32,20 +32,20 @@ int main(int argc, char * argv[]) {
 
     if(strcmp(argv[1],"emitter") == 0) {
         if (sendFile(fd, argv[2]) != 0) {
-            fprintf(stderr, "File sending failed.\n");
+            fprintf(stderr, "\nFile sending failed.\n");
             return FILE_SENDING_FAILED;
         }
         printTransferInfo(EMITTER);
     } else {
         if (retrieveFile(fd) != 0) {
-            fprintf(stderr, "File receiving failed.\n");
+            fprintf(stderr, "\nFile receiving failed.\n");
             return FILE_RECEIVING_FAILED;
         }
         printTransferInfo(RECEIVER);
     }
 
     clock_t end_time = clock();
-    float elapsed_time = (float)(end_time - start_time)/10000;
+    float elapsed_time = (float)(end_time - start_time) / CLOCKS_PER_SEC * 1000;
     printf("Elapsed time: %fs\n", elapsed_time);
 
     return 0;
