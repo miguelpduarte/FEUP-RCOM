@@ -55,7 +55,7 @@
 int sendFile(int fd, const char* file_name);
 
 /**
- * @brief   writes a file to the serial port data connection
+ * @brief   reads a file from the serial port data connection
  * @param   fd  data connection file descriptor
  * @param   db   dynamic buffer reference
  * @return  0 on success, non-zero otherwise
