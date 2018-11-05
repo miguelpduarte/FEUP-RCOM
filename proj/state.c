@@ -203,3 +203,7 @@ static void handleFinalFlagRcv() {
         setState(MSG_ERROR);
     }
 }
+
+u_ll getSMNumBits() {
+    return ((u_ll) state_machine.msg_index * 8);
+}

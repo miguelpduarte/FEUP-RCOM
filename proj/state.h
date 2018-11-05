@@ -62,4 +62,6 @@ byte * getInfoMsgBuffer(size_t * msg_size);
  */
 void resetMsgState();
 
+u_ll getSMNumBits();
+
 #endif /* _INFO_STATE_ */

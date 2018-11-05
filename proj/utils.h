@@ -20,6 +20,7 @@
 typedef unsigned char byte;
 typedef unsigned short u_short;
 typedef unsigned int u_int;
+typedef unsigned long long u_ll;
 
 /** Structure regarding data stuffing information */
 typedef struct {

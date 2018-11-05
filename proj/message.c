@@ -9,6 +9,7 @@
 
 static size_t num_rejs;
 static size_t num_rrs;
+static unsigned long long num_bits = 0;
 
 int writeSupervisionMessage(int fd, byte msg_addr, byte msg_ctrl) {
     byte msg_buf[MSG_SUPERVISION_MSG_SIZE];
@@ -61,6 +62,7 @@ byte readInfoMsgResponse(int fd, byte msg_nr_S) {
     //else, porque rr retorna o que vier no rr
     // - no need to worry with checking if its the same, that's in the above layer
     int ret = readSupervisionMessage(fd);
+    num_bits += ret;
 
     if (ret != MSG_SUPERVISION_MSG_SIZE) {
         // Response got lost
@@ -130,6 +132,7 @@ int receiverRead(int fd, dyn_buffer_st * dyn_buffer) {
         handleMsgByte(msg_byte);
 
         if (getState() == SUP_MSG_RECEIVED) {
+            num_bits += 5;
             if (getMsgCtrl() == MSG_CTRL_DISC) {
                 return RECEIVER_READ_DISC;
             }
@@ -139,6 +142,7 @@ int receiverRead(int fd, dyn_buffer_st * dyn_buffer) {
                 read_buf = getInfoMsgBuffer(&read_buf_size);
 
                 concatBuffer(dyn_buffer, read_buf, read_buf_size);
+                num_bits += getSMNumBits();
 
                 // ready to receive next message
                 msg_nr++;
@@ -184,4 +188,8 @@ size_t getNumRRs(){
 
 size_t getNumRejs(){
     return num_rejs;
+}
+
+u_ll getNumBits() {
+    return num_bits;
 }

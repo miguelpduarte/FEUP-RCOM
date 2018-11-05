@@ -71,4 +71,6 @@ size_t getNumRRs();
 
 size_t getNumRejs();
 
+u_ll getNumBits();
+
 #endif /* _MESSAGE_ */

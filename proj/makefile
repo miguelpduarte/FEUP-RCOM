@@ -16,7 +16,7 @@ OBJS=$(subst .c,.o,$(SRCS))
 all: main
 
 main: $(OBJS)
-	$(CC) $(LDFLAGS) -o rcominator3000.out $(OBJS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o file_transmitter.out $(OBJS) $(LDLIBS)
 
 depend: $(DEPFILE)
 

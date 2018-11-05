@@ -8,6 +8,7 @@
 #include "chrono.h"
 
 static size_t num_packets;
+static size_t num_file_bits;
 
 /**
  * @brief   sends a control packet to the serial port data connection
@@ -287,6 +288,7 @@ static int interpretPackets(dyn_buffer_st * db) {
     printf("Creating '%s'\n", file_name);
 
     int write_file_ret = writeFile(file_name, file_content);
+    num_file_bits = file_content->length * 8;
 
     free(file_name);
     deleteBuffer(&file_content);
@@ -296,6 +298,13 @@ static int interpretPackets(dyn_buffer_st * db) {
 
 void printTransferInfo(int isReceiver) {
     printf("\nNumber of Packets %s: %zu\n", isReceiver ? "received" : "sent", num_packets);
-    printf("Number of RRs %s: %zu\n", isReceiver ? "received" : "sent", getNumRRs());
+
+    if (isReceiver) {
+        printf("\nFile Size (bits): %zu\n", num_file_bits);
+        printf("Number of bits received: %llu\n", getNumBits());
+        printf("'Extra' bits: %llu\n", getNumBits() - num_file_bits);
+    }
+
+    printf("\nNumber of RRs %s: %zu\n", isReceiver ? "received" : "sent", getNumRRs());
     printf("Number of REJs %s: %zu\n", isReceiver ? "received" : "sent", getNumRejs());
 }
