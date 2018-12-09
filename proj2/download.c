@@ -7,16 +7,6 @@
 #include "parser.h"
 
 int main(int argc, char* argv[]) {
-
-    char * my_ip = NULL;
-
-    hostname_to_ip("google.com", &my_ip);
-
-    printf("ip from host: %s\n", my_ip);
-
-    free(my_ip);
-
-
     if (argc != 2) {
         fprintf(stderr, "usage: %s ftp://[<user>:<password>@]<host>/<url-path>.\n", argv[0]);
         exit(INVALID_ARGS);
@@ -30,17 +20,25 @@ int main(int argc, char* argv[]) {
 
     validate_url(argv[1], &user, &password, &host, &path, &file);
 
-    start_connection(user, password, host, path, file);
+    char* ip = NULL;
+    if (hostname_to_ip(host, &ip) != 0) {
+        exit(HOSTNAME_TRANSLATION_ERROR);
+    }
 
-    printf("User:     %s\n", user);
-    printf("Password: %s\n", password);
-    printf("Host:     %s\n", host); 
-    printf("URL:      %s\n", path);
-    printf("File:     %s\n", file);
+    if (transfer_file(user, password, ip, path, file) != 0) {
+        exit(FILE_TRANSFER_ERROR);
+    }
+
+    // printf("User:     %s\n", user);
+    // printf("Password: %s\n", password);
+    // printf("Host:     %s\n", host); 
+    // printf("URL:      %s\n", path);
+    // printf("File:     %s\n", file);
 
     free(user);
     free(password);
     free(host);
+    free(ip);
     free(path);
     free(file);
 

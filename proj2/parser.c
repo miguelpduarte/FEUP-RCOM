@@ -13,13 +13,12 @@ static bool host_is_specified(const char* url);
 int parsePASV(const char* pasv, char** ip, unsigned* port) {
     unsigned short h1, h2, h3, h4, p1, p2;
 
-    int i;
-    if ((i = sscanf(pasv, PASV_SUCCESS, &h1, &h2, &h3, &h4, &p1, &p2)) != NUM_PASV_FIELDS) {
+    if (sscanf(pasv, PASV_SUCCESS, &h1, &h2, &h3, &h4, &p1, &p2) != NUM_PASV_FIELDS) {
         return -1;
     } else {
         *port = (p1<<8) | p2;
         *ip = malloc(IP_STRING_SIZE * sizeof(**ip));
-        sprintf(*ip, "%d.%d.%d.%d", h1, h2, h3, h4);
+        snprintf(*ip, IP_STRING_SIZE, "%d.%d.%d.%d", h1, h2, h3, h4);
         return 0;
     }
 }
