@@ -1,0 +1,38 @@
+>>>>>>>> ftp -d mirrors.up.pt >> ./prog ftp://anonymous:@mirrors.up.pt/debian/README
+Connected to mirrors.up.pt.
+220-Welcome to the University of Porto's mirror archive (mirrors.up.pt)
+220----------------------------------------------------------------
+220-
+220-All connections and transfers are logged. The max number of connections is 200.
+220-
+220-For more information please visit our website: http://mirrors.up.pt/
+220-Questions and comments can be sent to mirrors@uporto.pt
+220-
+220-
+220 
+Name (mirrors.up.pt:miguel): anonymous
+---> USER anonymous
+331 Please specify the password.
+Password:
+---> PASS XXXX
+230 Login successful.
+---> SYST
+215 UNIX Type: L8
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp> cd debian
+---> CWD debian
+250 Directory successfully changed.
+ftp> passive
+Passive mode on.
+ftp> get README
+---> TYPE I
+200 Switching to Binary mode.
+---> PASV
+227 Entering Passive Mode (193,137,29,15,213,242).
+---> RETR README
+150 Opening BINARY mode data connection for README (1184 bytes).
+226 Transfer complete.
+ftp> ^D
+---> QUIT
+221 Goodbye.
