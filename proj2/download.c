@@ -4,7 +4,8 @@
 #include <string.h>
 #include "download.h"
 
-static void validate_url(const char* url, char** user, char** password, char** host, char** path);
+static void validate_url(const char* url, char** user, char** password, char** host, char** path, char** file);
+static size_t last_index_of(const char * str, const char to_find);
 static bool url_has_user(const char* url);
 static bool host_is_specified(const char* url);
 
@@ -18,22 +19,26 @@ int main(int argc, char* argv[]) {
     char* password = NULL;
     char* host = NULL;
     char* path = NULL;
-    validate_url(argv[1], &user, &password, &host, &path);
+    char* file = NULL;
+
+    validate_url(argv[1], &user, &password, &host, &path, &file);
 
     printf("User:     %s\n", user);
     printf("Password: %s\n", password);
     printf("Host:     %s\n", host); 
     printf("URL:      %s\n", path);
+    printf("File:     %s\n", file);
 
     free(user);
     free(password);
     free(host);
     free(path);
+    free(file);
 
     return 0;
 }
 
-static void validate_url(const char* url, char** user, char** password, char** host, char** path) {
+static void validate_url(const char* url, char** user, char** password, char** host, char** path, char** file) {
     if (strncmp(url, URL_START, strlen(URL_START)) != 0) {
         fprintf(stderr, "Invalid URL. URL should start with '" URL_START "'.\n");
         exit(INVALID_URL);
@@ -58,12 +63,15 @@ static void validate_url(const char* url, char** user, char** password, char** h
         for (; url[index] != '@'; ++index) {
             password_len++;
         }
+
+        // TODO SEGFAULTS SOMETIMES, FIX
         if (password_len == 0) {
             fprintf(stderr, "Invalid URL. Password can not be empty.\n");
             exit(INVALID_USERNAME);
         }
-
+       
         *password = strndup(url + index - password_len, password_len);
+
         index++;    //ignore '@' char
     } 
 
@@ -89,8 +97,31 @@ static void validate_url(const char* url, char** user, char** password, char** h
         fprintf(stderr, "Invalid URL. Path can not be empty.\n");
         exit(INVALID_PATH);
     }
+
+    // Actually the index of the '/'
+    size_t file_name_index = last_index_of(url + index, '/');
+    if (file_name_index == 0) {
+        // There is no path specified, file is in root
+        *path = strndup(".", 1);
+        *file = strndup(url + index, path_len);
+    } else {
+        // There is a path AND a file
+        *path = strndup(url + index, file_name_index);
+        *file = strndup(url + index + file_name_index + 1, path_len - file_name_index - 1);
+    }
     
-    *path = strndup(url + index, path_len);
+}
+
+static size_t last_index_of(const char * str, const char to_find) {
+    const size_t str_size = strlen(str);
+    size_t i = str_size - 1;
+    for (; i > 0; --i) {
+        if (str[i] == to_find) {
+            return i;
+        }
+    }
+
+    return 0;
 }
 
 static bool url_has_user(const char* url) {
