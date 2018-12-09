@@ -8,7 +8,7 @@
 // Commands
 #define USER        "USER"
 #define PASS        "PASS"
-#define CD          "CWD"
+#define CWD         "CWD"
 #define TYPE_BINARY "TYPE I"
 #define PASSIVE     "PASV"
 #define RETRIEVE    "RETR"
@@ -42,8 +42,9 @@
 #define MALLOC_ERROR                    2
 #define ERROR_READING_EXTRA_RESPONSE    3
 #define SENDING_COMMAND_ERROR           4
-#define ERROR_READING_INITIAL_RESPONSE  5
-#define INVALID_RESPONSE                6
+#define READING_RESPONSE_ERROR          5
+#define ERROR_READING_INITIAL_RESPONSE  6
+#define INVALID_RESPONSE                7
 
 // Temp: Processo:
 /* 

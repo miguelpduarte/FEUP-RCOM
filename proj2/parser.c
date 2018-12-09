@@ -58,7 +58,10 @@ void validate_url(const char* url, char** user, char** password, char** host, ch
         }
 
         index++;    //ignore '@' char
-    } 
+    } else {
+        *user = strndup("", 0);
+        *password = strndup("", 0);        
+    }
 
     if (!host_is_specified(url + index)) {
         fprintf(stderr, "Invalid URL. URL must include host and path.\n");
