@@ -9,6 +9,7 @@
 #define CHANGE_DIR_ERROR            6
 #define CWD_ERROR                   7
 #define SET_BINARY_MODE_ERROR       8
+#define PARSE_PASV_FAILED           9
 
 #define FTP_CONTROL_PORT 21
 

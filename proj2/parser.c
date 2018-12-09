@@ -12,8 +12,8 @@ static bool host_is_specified(const char* url);
 
 int parsePASV(const char* pasv, char** ip, unsigned* port) {
     unsigned short h1, h2, h3, h4, p1, p2;
-
-    if (sscanf(pasv, PASV_SUCCESS, &h1, &h2, &h3, &h4, &p1, &p2) != NUM_PASV_FIELDS) {
+    
+    if (sscanf(pasv, PASV_STRING, &h1, &h2, &h3, &h4, &p1, &p2) != NUM_PASV_FIELDS) {
         return -1;
     } else {
         *port = (p1<<8) | p2;

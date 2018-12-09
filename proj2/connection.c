@@ -1,5 +1,6 @@
 #include "connection.h"
 #include "commands.h"
+#include "parser.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <netdb.h>
@@ -14,6 +15,7 @@ static int login(int command_socketfd, const char* user, const char* password);
 static void close_connection(int command_socketfd);
 static int change_directory(int command_socketfd, const char* path);
 static int set_binary_mode(int command_socketfd);
+static int set_passive_mode(int command_socketfd, char** ip, unsigned* port);
 
 int hostname_to_ip(const char* hostname, char** ip) {
     struct hostent * h;
@@ -94,7 +96,16 @@ int transfer_file(const char* user, const char* password, const char* ip, const 
     }
 
     // Enter passive mode
-
+    char* ip_pasv = NULL;
+    unsigned port_pasv;
+    if (set_passive_mode(command_socketfd, &ip_pasv, &port_pasv) != 0) {
+        fprintf(stderr, "Set passive mode failed!\n");
+        return SET_BINARY_MODE_ERROR;        
+    }
+    printf("\nPASV IP:   %s\n", ip_pasv);
+    printf("PASV PORT: %d\n\n", port_pasv);
+    free(ip_pasv);
+    
     // Download the file
 
     // Close connection
@@ -157,7 +168,7 @@ static int login(int command_socketfd, const char* user, const char* password) {
     }
 
     if (response_code != USER_SUCCESS_CODE) {
-        fprintf(stderr, "Login failed (user)\nResponse: %hd - %s", response_code, response);
+        fprintf(stderr, "Login failed (user)\nResponse: %hd - %s\n", response_code, response);
         return LOGIN_ERROR;
     }
 
@@ -185,7 +196,7 @@ static int login(int command_socketfd, const char* user, const char* password) {
     }
     
     if (response_code != PASS_SUCCESS_CODE) {
-        fprintf(stderr, "Login failed (pass)\nResponse: %hd - %s", response_code, response);
+        fprintf(stderr, "Login failed (pass)\nResponse: %hd - %s\n", response_code, response);
         return LOGIN_ERROR;
     }
 
@@ -220,7 +231,7 @@ static void close_connection(int command_socketfd) {
     }
 
     if (response_code != QUIT_SUCCESS_CODE) {
-        fprintf(stderr, "Quit failed\nResponse: %hd - %s", response_code, response);
+        fprintf(stderr, "Quit failed\nResponse: %hd - %s\n", response_code, response);
         return;
     }
 
@@ -263,7 +274,7 @@ static int change_directory(int command_socketfd, const char* path) {
     }
 
     if (response_code != CWD_SUCCESS_CODE) {
-        fprintf(stderr, "CWD failed\nResponse: %hd - %s", response_code, response);
+        fprintf(stderr, "CWD failed\nResponse: %hd - %s\n", response_code, response);
         return CWD_ERROR;
     }
 
@@ -294,8 +305,45 @@ static int set_binary_mode(int command_socketfd) {
     }
 
     if (response_code != TYPE_SUCCESS_CODE) {
-        fprintf(stderr, "Set binary mode failed\nResponse: %hd - %s", response_code, response);
+        fprintf(stderr, "Set binary mode failed\nResponse: %hd - %s\n", response_code, response);
         return INVALID_RESPONSE;
+    }
+
+    free(response);
+    return 0;
+}
+
+static int set_passive_mode(int command_socketfd, char** ip, unsigned* port) {
+    if (send_command(command_socketfd, PASV) != 0) {
+        fprintf(stderr, "Failed to send command: %s\n", PASV);
+        return SENDING_COMMAND_ERROR;
+    }
+
+    if (DEBUG_MODE) {
+        printf("->> %s\n", PASV);
+    }
+
+    unsigned short response_code;
+    char* response = NULL;
+    size_t response_size;
+
+    if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
+        fprintf(stderr, "Failed to read set passive mode command response\n");
+        return READING_RESPONSE_ERROR;
+    }
+
+    if (DEBUG_MODE) {
+        printf("%hd - %s\n", response_code, response);
+    }
+
+    if (response_code != PASV_SUCCESS_CODE) {
+        fprintf(stderr, "Set passive mode failed\nResponse: %hd - %s\n", response_code, response);
+        return INVALID_RESPONSE;
+    }
+
+    if (parsePASV(response, ip, port) != 0) {
+        fprintf(stderr, "Failed to parse passive mode response\n");
+        return PARSE_PASV_FAILED;
     }
 
     free(response);

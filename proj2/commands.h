@@ -10,8 +10,8 @@
 #define PASS        "PASS"
 #define CWD         "CWD"
 #define TYPE_BINARY "TYPE I"
-#define PASSIVE     "PASV"
-#define RETRIEVE    "RETR"
+#define PASV        "PASV"
+#define RETR        "RETR"
 #define QUIT        "QUIT"
 
 // Replies
@@ -28,6 +28,7 @@
 #define TYPE_SUCCESS                    "200 Switching to Binary mode."
 #define PASV_SUCCESS_CODE               227
 #define PASV_SUCCESS                    "227 Entering Passive Mode (%hd,%hd,%hd,%hd,%hd,%hd)."
+#define PASV_STRING                     " Entering Passive Mode (%hd,%hd,%hd,%hd,%hd,%hd)."
 #define RETR_INITIAL_SUCCESS_CODE       150
 #define RETR_INITIAL_SUCCESS            "150 Opening BINARY mode data connection for <file> (<size> bytes)."
 #define RETR_FINAL_SUCCESS_CODE         226
