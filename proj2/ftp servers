@@ -1,0 +1,5 @@
+./rcominator9001.out ftp://dlpuser@dlptest.com:e73jzTRTNqCN9PYAAjjn@ftp.dlptest.com/test.txt
+
+./rcominator9001.out ftp://anonymous@speedtest.tele2.net/1MB.zip
+
+./rcominator9001.out ftp://anonymous@mirrors.up.pt/debian/README
