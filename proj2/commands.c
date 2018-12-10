@@ -45,10 +45,17 @@ int read_command_reply(int socketfd, unsigned short* response_code, char** respo
     }
 
     *response_str[0] = '\0';
+    
+    int socketfd_dup = dup(socketfd);
 
-    FILE* socket_fileptr = fdopen(socketfd, "r");
+    if (socketfd_dup == -1) {
+        return READ_CMD_ERROR;
+    }
+
+    FILE* socket_fileptr = fdopen(socketfd_dup, "r");
 
     if (socket_fileptr == NULL) {
+        close(socketfd_dup);
         return READ_CMD_ERROR;
     }
 
@@ -66,6 +73,7 @@ int read_command_reply(int socketfd, unsigned short* response_code, char** respo
     }
 
     free(buf);
+    fclose(socket_fileptr);
 
     if (num_bytes < 0) {
         fprintf(stderr, "Error reading command reply!\n");
@@ -78,6 +86,7 @@ int read_command_reply(int socketfd, unsigned short* response_code, char** respo
 
     char* code_str = strndup(*response_str, 3);
     *response_code = atoi(code_str);
+    free(code_str);
     (*response_str)[RESPONSE_MAX_SIZE-1] = '\0';
 
     return 0;
