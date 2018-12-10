@@ -3,3 +3,7 @@
 ./rcominator9001.out ftp://anonymous@speedtest.tele2.net/1MB.zip
 
 ./rcominator9001.out ftp://anonymous@mirrors.up.pt/debian/README
+
+./rcominator9001.out ftp://demo:password@test.rebex.net/readme.txt
+
+./rcominator9001.out ftp://demo-user:demo-user@demo.wftpserver.com      // can't find file to download on this one
