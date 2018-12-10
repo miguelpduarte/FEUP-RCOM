@@ -37,7 +37,6 @@ int connect_to_ip(const char * ip, unsigned port) {
 }
 
 int read_command_reply(int socketfd, unsigned short* response_code, char** response_str, size_t * response_str_size) {    
-    char code_str[CODE_SIZE];
     *response_str = calloc(RESPONSE_MAX_SIZE, sizeof(**response_str));
 
     if (*response_str == NULL) {
@@ -45,23 +44,40 @@ int read_command_reply(int socketfd, unsigned short* response_code, char** respo
         return MALLOC_ERROR;
     }
 
-    if (read(socketfd, code_str, CODE_SIZE * sizeof(*code_str)) < CODE_SIZE) {
-        fprintf(stderr, "Error reading command reply code!\n");
+    *response_str[0] = '\0';
+
+    FILE* socket_fileptr = fdopen(socketfd, "r");
+
+    if (socket_fileptr == NULL) {
         return READ_CMD_ERROR;
     }
 
-    *response_code = atoi(code_str);
-    *response_str_size = read(socketfd, *response_str, RESPONSE_MAX_SIZE * sizeof(**response_str));
+    char* buf = NULL;
+    size_t num_bytes;
+    *response_str_size = 0;
+    while ((num_bytes = getline(&buf, &num_bytes, socket_fileptr)) >= 0) {
+        strncat(*response_str, buf, num_bytes);
+        response_str_size += num_bytes;
 
-    if (*response_str_size == -1) {
-        fprintf(stderr, "Error reading extra response\n");
-        return ERROR_READING_EXTRA_RESPONSE;
+        // Last line in multi line responses have a space character after the code
+        if (buf[CODE_SIZE] == ' ') {
+            break;
+        }
+    }
+
+    free(buf);
+
+    if (num_bytes < 0) {
+        fprintf(stderr, "Error reading command reply!\n");
+        return READ_CMD_ERROR;
     }
 
     if (*response_str_size == 0) {
         fprintf(stderr, "No extra response was received\n");
     }
 
+    char* code_str = strndup(*response_str, 3);
+    *response_code = atoi(code_str);
     (*response_str)[RESPONSE_MAX_SIZE-1] = '\0';
 
     return 0;

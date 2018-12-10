@@ -44,9 +44,6 @@ int transfer_file(const char* user, const char* password, const char* ip, const 
         return SOCKET_ERROR;
     }
 
-    printf("Ask teacher about server taking time to respond\n");
-    sleep(1);
-
     // Read initial response
     if (read_initial_response(command_socketfd) != 0) {
         fprintf(stderr, "Failed to read initial response!\n");
@@ -157,7 +154,7 @@ static int login(int command_socketfd, const char* user, const char* password) {
     }
 
     if (DEBUG_MODE) {
-        printf("%hd -%s\n", response_code, response);
+        printf("%s\n", response);
     }
 
     if (response_code != USER_SUCCESS_CODE) {
@@ -189,7 +186,7 @@ static int login(int command_socketfd, const char* user, const char* password) {
     }
 
     if (DEBUG_MODE) {
-        printf("%hd -%s\n", response_code, response);
+        printf("%s\n", response);
     }
     
     if (response_code != PASS_SUCCESS_CODE) {
@@ -223,7 +220,7 @@ static void close_connection(int command_socketfd) {
     }
 
     if (DEBUG_MODE) {
-        printf("%hd -%s\n", response_code, response);
+        printf("%s\n", response);
     }
 
     if (response_code != QUIT_SUCCESS_CODE) {
@@ -270,7 +267,7 @@ static int change_directory(int command_socketfd, const char* path) {
     }
 
     if (DEBUG_MODE) {
-        printf("%hd -%s\n", response_code, response);
+        printf("%s\n", response);
     }
 
     if (response_code != CWD_SUCCESS_CODE) {
@@ -304,7 +301,7 @@ static int set_binary_mode(int command_socketfd) {
     }
 
     if (DEBUG_MODE) {
-        printf("%hd -%s\n", response_code, response);
+        printf("%s\n", response);
     }
 
     if (response_code != TYPE_SUCCESS_CODE) {
@@ -338,7 +335,7 @@ static int set_passive_mode(int command_socketfd, int* data_socketfd) {
     }
 
     if (DEBUG_MODE) {
-        printf("%hd -%s\n", response_code, response);
+        printf("%s\n", response);
     }
 
     if (response_code != PASV_SUCCESS_CODE) {
@@ -403,7 +400,7 @@ int request_file(int command_socketfd, const char * file) {
     }
 
     if (DEBUG_MODE) {
-        printf("%hd -%s\n", response_code, response);
+        printf("%s", response);
     }
 
     if (response_code != RETR_INITIAL_SUCCESS_CODE) {
@@ -429,7 +426,7 @@ int read_retrieve_final_response(int command_socketfd) {
     }
 
     if (DEBUG_MODE) {
-        printf("%hd -%s\n", response_code, response);
+        printf("%s\n", response);
     }
 
     if (response_code != RETR_FINAL_SUCCESS_CODE) {
@@ -455,7 +452,7 @@ int read_initial_response(int command_socketfd) {
     }
 
     if (DEBUG_MODE) {
-        printf("%hd - %s\n", response_code, response);
+        printf("%s\n", response);
     }
 
     if (response_code != INITIAL_CONNECTION_CODE) {
