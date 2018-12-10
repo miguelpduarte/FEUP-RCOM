@@ -30,6 +30,8 @@
 #define PASV_SUCCESS                    "227 Entering Passive Mode (%hd,%hd,%hd,%hd,%hd,%hd)."
 #define RETR_INITIAL_SUCCESS_CODE       150
 #define RETR_INITIAL_SUCCESS            "150 Opening BINARY mode data connection for <file> (<size> bytes)."
+#define RETR_INITIAL_SUCCESS_CODE_2     125
+#define RETR_INITIAL_SUCCESS_2          "125 Data connection already open; Transfer starting."
 #define RETR_FINAL_SUCCESS_CODE         226
 #define RETR_FINAL_SUCCESS              "226 Transfer complete."
 #define RETR_FAILURE_CODE               550
@@ -39,6 +41,8 @@
 
 #define CODE_SIZE                       3
 #define RESPONSE_MAX_SIZE               1025
+#define COMMAND_TERMINATOR              "\r\n"
+#define COMMAND_TERMINATOR_SIZE         2
 
 #define READ_CMD_ERROR                  1
 #define MALLOC_ERROR                    2

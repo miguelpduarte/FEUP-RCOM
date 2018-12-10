@@ -60,7 +60,7 @@ int read_command_reply(int socketfd, unsigned short* response_code, char** respo
     }
 
     char* buf = NULL;
-    size_t num_bytes;
+    size_t num_bytes = 0;
     *response_str_size = 0;
     while ((num_bytes = getline(&buf, &num_bytes, socket_fileptr)) >= 0) {
         strncat(*response_str, buf, num_bytes);
@@ -100,7 +100,7 @@ int send_command(int socketfd, const char* command) {
         return SENDING_COMMAND_ERROR;
     }
 
-    if (write(socketfd, "\n", 1) != 1) {
+    if (write(socketfd, COMMAND_TERMINATOR, COMMAND_TERMINATOR_SIZE) != COMMAND_TERMINATOR_SIZE) {
         fprintf(stderr, "Error sending command terminator!\n");
         return SENDING_COMMAND_ERROR;
     }

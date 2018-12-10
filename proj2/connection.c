@@ -403,7 +403,7 @@ int request_file(int command_socketfd, const char * file) {
         printf("%s", response);
     }
 
-    if (response_code != RETR_INITIAL_SUCCESS_CODE) {
+    if (response_code != RETR_INITIAL_SUCCESS_CODE && response_code != RETR_INITIAL_SUCCESS_CODE_2) {
         fprintf(stderr, "RETR failed\nResponse: %hd - %s\n", response_code, response);
         free(response);
         return RETR_ERROR;
