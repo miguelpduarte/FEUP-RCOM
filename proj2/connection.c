@@ -1,6 +1,7 @@
 #include "connection.h"
 #include "commands.h"
 #include "parser.h"
+#include "file.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <netdb.h>
@@ -15,7 +16,11 @@ static int login(int command_socketfd, const char* user, const char* password);
 static void close_connection(int command_socketfd);
 static int change_directory(int command_socketfd, const char* path);
 static int set_binary_mode(int command_socketfd);
-static int set_passive_mode(int command_socketfd, char** ip, unsigned* port);
+static int set_passive_mode(int command_socketfd, int* data_socketfd);
+static int request_file(int command_socketfd, const char * file);
+static int read_retrieve_final_response(int command_socketfd);
+static int read_initial_response(int command_socketfd);
+
 
 int hostname_to_ip(const char* hostname, char** ip) {
     struct hostent * h;
@@ -32,50 +37,21 @@ int hostname_to_ip(const char* hostname, char** ip) {
 }
 
 int transfer_file(const char* user, const char* password, const char* ip, const char* path, const char* file) {
-	struct sockaddr_in server_addr;
-
-	memset(&server_addr, 0, sizeof(server_addr));
-
-    server_addr.sin_family = AF_INET;
-    // 32 bit Internet address network byte ordered
-	server_addr.sin_addr.s_addr = inet_addr(ip);
-	server_addr.sin_port = htons(FTP_CONTROL_PORT);
-
-    int command_socketfd = socket(AF_INET, SOCK_STREAM, 0);
-
+    int command_socketfd = connect_to_ip(ip, FTP_CONTROL_PORT);
+    
     if (command_socketfd < 0) {
-        fprintf(stderr, "Error creating socket\n");
-        exit(SOCKET_ERROR);
+        fprintf(stderr, "Error creating command socket\n");
+        return SOCKET_ERROR;
     }
-
-    // Open connection to the server
-    if (connect(command_socketfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
-        fprintf(stderr, "Error connecting to the given ip\n");
-		exit(CONNECTION_ERROR);
-    }
-
-    // Read initial response
-    unsigned short response_code;
-    char* response = NULL;
-    size_t response_size;
 
     printf("Ask teacher about server taking time to respond\n");
     sleep(1);
 
-    if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
-        fprintf(stderr, "Error reading initial response!\n");
-        return ERROR_READING_INITIAL_RESPONSE;
+    // Read initial response
+    if (read_initial_response(command_socketfd) != 0) {
+        fprintf(stderr, "Failed to read initial response!\n");
+        return READ_INITIAL_RESPONSE_ERROR;        
     }
-
-    if (DEBUG_MODE) {
-        printf("%hd - %s\n", response_code, response);
-    }
-
-    if (response_code != INITIAL_CONNECTION_CODE) {
-        fprintf(stderr, "Invalid initial response code\nResponse: %hd - %s", response_code, response);
-        return INVALID_RESPONSE;
-    }
-    free(response);
 
     // Login to the server
     if (login(command_socketfd, user, password) != 0) {
@@ -96,25 +72,38 @@ int transfer_file(const char* user, const char* password, const char* ip, const 
     }
 
     // Enter passive mode
-    char* ip_pasv = NULL;
-    unsigned port_pasv;
-    if (set_passive_mode(command_socketfd, &ip_pasv, &port_pasv) != 0) {
+    int data_socketfd;
+    if (set_passive_mode(command_socketfd, &data_socketfd) != 0) {
         fprintf(stderr, "Set passive mode failed!\n");
-        return SET_BINARY_MODE_ERROR;        
+        return SET_PASISVE_MODE_ERROR;        
     }
-    printf("\nPASV IP:   %s\n", ip_pasv);
-    printf("PASV PORT: %d\n\n", port_pasv);
-    free(ip_pasv);
-    
-    // Download the file
+
+    // Requesting file and reading initial response
+    if (request_file(command_socketfd, file) != 0) {
+        fprintf(stderr, "Failure in requesting file!\n");
+        return REQUEST_FILE_FAILED;
+    }
+
+    // Downloading file
+    if (copy_file(data_socketfd, file) != 0) {
+        fprintf(stderr, "Failure in downloading file!\n");
+        return DOWNLOAD_FILE_FAILED;
+    }
+
+    // Reading retrieve final response
+    if (read_retrieve_final_response(command_socketfd) != 0) {
+        fprintf(stderr, "Error reading retrieve final response!\n");
+        return RETRIEVE_FINAL_RESPONSE_FAILED;
+    }
 
     // Close connection
     close_connection(command_socketfd);
 
     // Close socket
     close(command_socketfd);
+    close(data_socketfd);
 
-    return -1;
+    return 0;
 }
 
 static int login(int command_socketfd, const char* user, const char* password) {
@@ -151,24 +140,29 @@ static int login(int command_socketfd, const char* user, const char* password) {
     // Send Username
     if (send_command(command_socketfd, username_cmd) != 0) {
         fprintf(stderr, "Failed to send command: %s\n", username_cmd);
+        free(username_cmd);
+        free(password_cmd);
         return SENDING_COMMAND_ERROR;
     }
 
     if (DEBUG_MODE) {
         printf("->> %s\n", username_cmd);
     }
+    free(username_cmd);
 
     if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
         fprintf(stderr, "Failed to read user command response\n");
+        free(response);
         return READING_RESPONSE_ERROR;
     }
 
     if (DEBUG_MODE) {
-        printf("%hd - %s\n", response_code, response);
+        printf("%hd -%s\n", response_code, response);
     }
 
     if (response_code != USER_SUCCESS_CODE) {
         fprintf(stderr, "Login failed (user)\nResponse: %hd - %s\n", response_code, response);
+        free(response);
         return LOGIN_ERROR;
     }
 
@@ -179,31 +173,32 @@ static int login(int command_socketfd, const char* user, const char* password) {
     // Send Password
     if (send_command(command_socketfd, password_cmd) != 0) {
         fprintf(stderr, "Failed to send command: %s\n", password_cmd);
+        free(password_cmd);
         return SENDING_COMMAND_ERROR;
     }
 
     if (DEBUG_MODE) {
         printf("->> %s ****\n", PASS);
     }
+    free(password_cmd);
 
     if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
         fprintf(stderr, "Failed to read pass command response\n");
+        free(response);
         return READING_RESPONSE_ERROR;
     }
 
     if (DEBUG_MODE) {
-        printf("%hd - %s\n", response_code, response);
+        printf("%hd -%s\n", response_code, response);
     }
     
     if (response_code != PASS_SUCCESS_CODE) {
         fprintf(stderr, "Login failed (pass)\nResponse: %hd - %s\n", response_code, response);
+        free(response);
         return LOGIN_ERROR;
     }
 
     free(response);
-    free(username_cmd);
-    free(password_cmd);
-
     return 0;
 }
 
@@ -223,15 +218,17 @@ static void close_connection(int command_socketfd) {
 
     if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
         fprintf(stderr, "Failed to read quit command response\n");
+        free(response);
         return;
     }
 
     if (DEBUG_MODE) {
-        printf("%hd - %s\n", response_code, response);
+        printf("%hd -%s\n", response_code, response);
     }
 
     if (response_code != QUIT_SUCCESS_CODE) {
         fprintf(stderr, "Quit failed\nResponse: %hd - %s\n", response_code, response);
+        free(response);
         return;
     }
 
@@ -245,7 +242,7 @@ static int change_directory(int command_socketfd, const char* path) {
         return MALLOC_ERROR;
     }
 
-    // Building Username Command    
+    // Building Username Command
     change_dir_command[0] = '\0';
     strcat(change_dir_command, CWD);
     strcat(change_dir_command, " ");
@@ -253,12 +250,14 @@ static int change_directory(int command_socketfd, const char* path) {
 
     if (send_command(command_socketfd, change_dir_command) != 0) {
         fprintf(stderr, "Failed to send command: %s\n", change_dir_command);
+        free(change_dir_command);
         return SENDING_COMMAND_ERROR;
     }
 
     if (DEBUG_MODE) {
         printf("->> %s\n", change_dir_command);
     }
+    free(change_dir_command);
 
     unsigned short response_code;
     char* response = NULL;
@@ -266,18 +265,21 @@ static int change_directory(int command_socketfd, const char* path) {
 
     if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
         fprintf(stderr, "Failed to read cwd command response\n");
+        free(response);
         return READING_RESPONSE_ERROR;
     }
 
     if (DEBUG_MODE) {
-        printf("%hd - %s\n", response_code, response);
+        printf("%hd -%s\n", response_code, response);
     }
 
     if (response_code != CWD_SUCCESS_CODE) {
         fprintf(stderr, "CWD failed\nResponse: %hd - %s\n", response_code, response);
+        free(response);
         return CWD_ERROR;
     }
 
+    free(response);
     return 0;
 }
 
@@ -297,15 +299,17 @@ static int set_binary_mode(int command_socketfd) {
 
     if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
         fprintf(stderr, "Failed to read set binary mode command response\n");
+        free(response);
         return READING_RESPONSE_ERROR;
     }
 
     if (DEBUG_MODE) {
-        printf("%hd - %s\n", response_code, response);
+        printf("%hd -%s\n", response_code, response);
     }
 
     if (response_code != TYPE_SUCCESS_CODE) {
         fprintf(stderr, "Set binary mode failed\nResponse: %hd - %s\n", response_code, response);
+        free(response);
         return INVALID_RESPONSE;
     }
 
@@ -313,7 +317,7 @@ static int set_binary_mode(int command_socketfd) {
     return 0;
 }
 
-static int set_passive_mode(int command_socketfd, char** ip, unsigned* port) {
+static int set_passive_mode(int command_socketfd, int* data_socketfd) {
     if (send_command(command_socketfd, PASV) != 0) {
         fprintf(stderr, "Failed to send command: %s\n", PASV);
         return SENDING_COMMAND_ERROR;
@@ -329,23 +333,138 @@ static int set_passive_mode(int command_socketfd, char** ip, unsigned* port) {
 
     if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
         fprintf(stderr, "Failed to read set passive mode command response\n");
+        free(response);
         return READING_RESPONSE_ERROR;
+    }
+
+    if (DEBUG_MODE) {
+        printf("%hd -%s\n", response_code, response);
+    }
+
+    if (response_code != PASV_SUCCESS_CODE) {
+        fprintf(stderr, "Set passive mode failed\nResponse: %hd - %s\n", response_code, response);
+        free(response);
+        return INVALID_RESPONSE;
+    }
+
+    char* ip_pasv = NULL;
+    unsigned port_pasv;
+
+    if (parsePASV(response, &ip_pasv, &port_pasv) != 0) {
+        fprintf(stderr, "Failed to parse passive mode response\n");
+        free(response);
+        return PARSE_PASV_FAILED;
+    }
+
+    free(response);
+
+    // Connecting to the data socket so that the process can resume
+    if ((*data_socketfd = connect_to_ip(ip_pasv, port_pasv)) < 0) {
+        fprintf(stderr, "Could not open connection to the data port\n");
+        free(ip_pasv);
+    }
+
+    free(ip_pasv);
+    return 0;
+}
+
+int request_file(int command_socketfd, const char * file) {
+    char* request_file_command = malloc((strlen(file) + strlen(RETR) + 2) * sizeof(*request_file_command));
+    
+    if (request_file_command == NULL) {
+        return MALLOC_ERROR;
+    }
+
+    // Building Username Command
+    request_file_command[0] = '\0';
+    strcat(request_file_command, RETR);
+    strcat(request_file_command, " ");
+    strcat(request_file_command, file);
+
+    if (send_command(command_socketfd, request_file_command) != 0) {
+        fprintf(stderr, "Failed to send command: %s\n", request_file_command);
+        free(request_file_command);
+        return SENDING_COMMAND_ERROR;
+    }
+
+    if (DEBUG_MODE) {
+        printf("->> %s\n", request_file_command);
+    }
+    free(request_file_command);
+
+    unsigned short response_code;
+    char* response = NULL;
+    size_t response_size;
+
+    if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
+        fprintf(stderr, "Failed to read retr initial command response\n");
+        free(response);
+        return READING_RESPONSE_ERROR;
+    }
+
+    if (DEBUG_MODE) {
+        printf("%hd -%s\n", response_code, response);
+    }
+
+    if (response_code != RETR_INITIAL_SUCCESS_CODE) {
+        fprintf(stderr, "RETR failed\nResponse: %hd - %s\n", response_code, response);
+        free(response);
+        return RETR_ERROR;
+    }
+
+    free(response);
+
+    return 0;
+}
+
+int read_retrieve_final_response(int command_socketfd) {
+    unsigned short response_code;
+    char* response = NULL;
+    size_t response_size;
+
+    if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
+        fprintf(stderr, "Failed to read retr final command response\n");
+        free(response);
+        return READING_RESPONSE_ERROR;
+    }
+
+    if (DEBUG_MODE) {
+        printf("%hd -%s\n", response_code, response);
+    }
+
+    if (response_code != RETR_FINAL_SUCCESS_CODE) {
+        fprintf(stderr, "RETR final failed\nResponse: %hd - %s\n", response_code, response);
+        free(response);
+        return RETR_FINAL_ERROR;
+    }
+
+    free(response);
+
+    return 0;
+}
+
+int read_initial_response(int command_socketfd) {
+    unsigned short response_code;
+    char* response = NULL;
+    size_t response_size;
+
+    if (read_command_reply(command_socketfd, &response_code, &response, &response_size) != 0) {
+        fprintf(stderr, "Error reading initial response!\n");
+        free(response);
+        return ERROR_READING_INITIAL_RESPONSE;
     }
 
     if (DEBUG_MODE) {
         printf("%hd - %s\n", response_code, response);
     }
 
-    if (response_code != PASV_SUCCESS_CODE) {
-        fprintf(stderr, "Set passive mode failed\nResponse: %hd - %s\n", response_code, response);
+    if (response_code != INITIAL_CONNECTION_CODE) {
+        fprintf(stderr, "Invalid initial response code\nResponse: %hd - %s", response_code, response);
+        free(response);
         return INVALID_RESPONSE;
     }
+    
+    free(response);    
 
-    if (parsePASV(response, ip, port) != 0) {
-        fprintf(stderr, "Failed to parse passive mode response\n");
-        return PARSE_PASV_FAILED;
-    }
-
-    free(response);
     return 0;
 }

@@ -33,6 +33,8 @@
 #define RETR_INITIAL_SUCCESS            "150 Opening BINARY mode data connection for <file> (<size> bytes)."
 #define RETR_FINAL_SUCCESS_CODE         226
 #define RETR_FINAL_SUCCESS              "226 Transfer complete."
+#define RETR_FAILURE_CODE               550
+#define RETR_FAILURE                    "550 Failed to change directory."
 #define QUIT_SUCCESS_CODE               221
 #define QUIT_SUCCESS                    "221 Goodbye."
 
@@ -46,6 +48,8 @@
 #define READING_RESPONSE_ERROR          5
 #define ERROR_READING_INITIAL_RESPONSE  6
 #define INVALID_RESPONSE                7
+#define SOCKET_CREATE_ERROR             -1
+#define SOCKET_CONNECT_ERROR            -2
 
 // Temp: Processo:
 /* 
@@ -78,6 +82,8 @@
 */
 
 int read_command_reply(int socketfd, unsigned short* response_code, char** response_str, size_t * response_str_size);
+
+int read_initial_command_reply(int socketfd, unsigned short* response_code, char** response_str, size_t * response_str_size);
 
 int send_command(int socketfd, const char* command);
 
