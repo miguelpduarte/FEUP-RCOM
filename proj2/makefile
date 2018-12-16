@@ -16,7 +16,7 @@ OBJS=$(subst .c,.o,$(SRCS))
 all: main
 
 main: $(OBJS)
-	$(CC) $(LDFLAGS) -o rcominator9001.out $(OBJS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o download $(OBJS) $(LDLIBS)
 
 depend: $(DEPFILE)
 

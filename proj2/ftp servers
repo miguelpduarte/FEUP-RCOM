@@ -1,9 +1,9 @@
-./rcominator9001.out ftp://dlpuser@dlptest.com:e73jzTRTNqCN9PYAAjjn@ftp.dlptest.com/test.txt
+./download ftp://dlpuser@dlptest.com:e73jzTRTNqCN9PYAAjjn@ftp.dlptest.com/test.txt  // this one crash sometimes, but "it's not our fault" TM
 
-./rcominator9001.out ftp://anonymous@speedtest.tele2.net/1MB.zip
+./download ftp://anonymous@speedtest.tele2.net/1MB.zip
 
-./rcominator9001.out ftp://anonymous@mirrors.up.pt/debian/README
+./download ftp://anonymous@mirrors.up.pt/debian/README
 
-./rcominator9001.out ftp://demo:password@test.rebex.net/readme.txt
+./download ftp://demo:password@test.rebex.net/readme.txt
 
-./rcominator9001.out ftp://demo-user:demo-user@demo.wftpserver.com      // can't find file to download on this one
+./download ftp://demo-user:demo-user@demo.wftpserver.com      // can't find file to download on this one
