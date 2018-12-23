@@ -29,12 +29,6 @@ int main(int argc, char* argv[]) {
         exit(FILE_TRANSFER_ERROR);
     }
 
-    // printf("User:     %s\n", user);
-    // printf("Password: %s\n", password);
-    // printf("Host:     %s\n", host); 
-    // printf("URL:      %s\n", path);
-    // printf("File:     %s\n", file);
-
     free(user);
     free(password);
     free(host);
